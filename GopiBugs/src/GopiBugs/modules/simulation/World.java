@@ -46,7 +46,6 @@ public class World {
     List<Result> results;
     int printCount = 0;
     int bugsLimitNumber;
- 
 
     public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
             List<Bug> bugs, int numberOfBugsCopies, int bugLife, JTextArea text,
@@ -61,41 +60,41 @@ public class World {
         this.text = text;
         this.bugsLimitNumber = bugsLimitNumber;
 
-       
 
 
 
-            if (results == null) {
-                this.results = new ArrayList<Result>();
+
+        if (results == null) {
+            this.results = new ArrayList<Result>();
+        } else {
+            this.results = results;
+        }
+
+        if (training != null) {
+            cells = new Cell[cellsPerSide][cellsPerSide];
+            for (int i = 0; i < cellsPerSide; i++) {
+                cells[i] = new Cell[cellsPerSide];
+                for (int j = 0; j < cells[i].length; j++) {
+                    cells[i][j] = new Cell(bugLife);
+                    this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
+                }
+            }
+
+            if (bugs == null) {
+                for (int i = 0; i < numberOfBugsCopies; i++) {
+                    for (PeakListRow row : training.getRows()) {
+                        this.addBug(row);
+                    }
+                }
             } else {
-                this.results = results;
+                this.population = bugs;
+                for (Bug bug : this.population) {
+                    bug.classify(range);
+
+                }
             }
 
-            if (training != null) {
-                cells = new Cell[cellsPerSide][cellsPerSide];
-                for (int i = 0; i < cellsPerSide; i++) {
-                    cells[i] = new Cell[cellsPerSide];
-                    for (int j = 0; j < cells[i].length; j++) {
-                        cells[i][j] = new Cell(bugLife);
-                        this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
-                    }
-                }
-
-                if (bugs == null) {
-                    for (int i = 0; i < numberOfBugsCopies; i++) {
-                        for (PeakListRow row : training.getRows()) {
-                            this.addBug(row);
-                        }
-                    }
-                } else {
-                    this.population = bugs;
-                    for (Bug bug : this.population) {
-                        bug.classify(range);
-
-                    }
-                }
-
-            }
+        }
 
     }
 
@@ -217,7 +216,7 @@ public class World {
         bug.setCell(cells[newx][newy]);
 
     }
-   
+
     public int getWorldSize() {
         return this.cellsPerSide;
     }
@@ -311,14 +310,12 @@ public class World {
         }
     }
 
-   
-
     public void printResult(Range range) {
         this.results.clear();
         Comparator<Result> c = new Comparator<Result>() {
 
             public int compare(Result o1, Result o2) {
-                if (o1.count < o2.count) {
+                if (o1.aucT < o2.aucV) {
                     return 1;
                 } else {
                     return -1;
@@ -359,25 +356,17 @@ public class World {
                 }
 
                 contbug++;
-                if (contbug > 20) {
-                    break;
-                }
             }
         }
 
-        //Collections.sort(results, c);
+        Collections.sort(results, c);
 
         contbug = 0;
         String result = range.toString() + " \n";
 
         for (Result r : results) {
-            // if (r.count > 3) {
             result += r.toString();
-            // }
             contbug++;
-            if (contbug > 30) {
-                break;
-            }
         }
 
         this.text.setText(result);

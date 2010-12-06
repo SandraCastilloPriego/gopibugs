@@ -163,7 +163,7 @@ public class StartSimulationTask {
 
             }
         }
-        double result = (count / this.totalIDs) * 100;
+        double result = ((double)((double)count / (double)this.totalIDs)) * 100;
         System.out.println("Count : " + count + "/" + this.totalIDs + " result: " + result + "%");
         return result;
     }
