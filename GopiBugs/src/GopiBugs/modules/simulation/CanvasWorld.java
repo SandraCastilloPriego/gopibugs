@@ -48,7 +48,7 @@ public class CanvasWorld extends Canvas {
             offscreen = createImage(canvasSize, canvasSize);
             offgc = offscreen.getGraphics();
 
-            List<Bug> population = this.world.getBugs();
+            List<Bug> population = this.world.population;
 
             int size = world.getWorldSize();
 

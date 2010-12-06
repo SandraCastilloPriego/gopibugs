@@ -58,7 +58,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 
-
 /**
  *
  * @author bicha
@@ -68,7 +67,7 @@ public class Bug {
     private Cell cell;
     private int x, y;
     private List<PeakListRow> rowList;
-    private double life = 300;
+    private int life = 300;
     private BugDataset dataset;
     private Classifier classifier;
     private classifiersEnum classifierType;
@@ -94,14 +93,23 @@ public class Bug {
         this.x = x;
         this.y = y;
         this.rowList = new ArrayList<PeakListRow>();
-        this.rowList.add(row);
-      //  int n = rand.nextInt(classifiersEnum.values().length);
-       // this.classifierType = classifiersEnum.values()[n];
-         this.classifierType = classifiersEnum.Logistic;
+        if (row != null) {
+            this.rowList.add(row);
+        }
+        //  int n = rand.nextInt(classifiersEnum.values().length);
+        // this.classifierType = classifiersEnum.values()[n];
+        this.classifierType = classifiersEnum.Logistic;
         this.classify(cell.getRange());
         this.life = bugLife;
         // 
         //  this.classify();
+    }
+
+    @Override
+    public Bug clone() {
+        Bug newBug = new Bug(this.x, this.y, this.cell, null, this.dataset, this.life);
+        newBug.rowList = this.getRows();
+        return newBug;
     }
 
     public double getAge() {
@@ -260,7 +268,7 @@ public class Bug {
                 this.sen++;
             }
 
-        }else{
+        } else {
             this.life -= 0.5;
         }
 

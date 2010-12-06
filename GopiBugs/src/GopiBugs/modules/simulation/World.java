@@ -62,8 +62,6 @@ public class World {
 
 
 
-
-
         if (results == null) {
             this.results = new ArrayList<Result>();
         } else {
@@ -111,7 +109,12 @@ public class World {
     }
 
     public List<Bug> getBugs() {
+       /* List<Bug> clone = new ArrayList<Bug>();
+        for(Bug bug : this.population){
+            clone.add(bug.clone());
+        }
 
+        return clone;*/
         return this.population;
     }
 
@@ -325,7 +328,7 @@ public class World {
 
 
         int contbug = 0;
-        for (Bug bug : this.population) {
+        for (Bug bug : this.getBugs()) {
             if (bug.getSensitivity() > 0.6 && bug.getSpecificity() > 0.6 && bug.getAge() > 400) {
                 Result result = new Result();
                 result.Classifier = bug.getClassifierType().name();
