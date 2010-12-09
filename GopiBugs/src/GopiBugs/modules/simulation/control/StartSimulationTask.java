@@ -24,13 +24,16 @@ import GopiBugs.data.impl.SimpleParameterSet;
 import GopiBugs.main.GopiBugsCore;
 import GopiBugs.modules.simulation.Bug;
 import GopiBugs.modules.simulation.CanvasWorld;
+import GopiBugs.modules.simulation.Result;
+import GopiBugs.modules.simulation.TestBug;
 import GopiBugs.modules.simulation.World;
-import GopiBugs.modules.simulation.World.Result;
 import GopiBugs.taskcontrol.TaskStatus;
 import GopiBugs.util.Range;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import java.util.List;
@@ -56,7 +59,9 @@ public class StartSimulationTask {
     private JTextArea textArea;
     private List<Range> ranges;
     private Random rand;
-    private int totalIDs, stoppingCriteria;
+    private int totalIDs, stoppingCriteria, stopCounting = 0;
+    private double minCountId = 100;
+    private List<Result> results;
 
     public StartSimulationTask(BugDataset[] datasets, SimpleParameterSet parameters) {
         for (BugDataset dataset : datasets) {
@@ -75,6 +80,7 @@ public class StartSimulationTask {
         this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
 
         this.ranges = new ArrayList<Range>();
+        this.results = new ArrayList<Result>();
         this.rand = new Random();
     }
 
@@ -163,10 +169,10 @@ public class StartSimulationTask {
 
             }
         }
-        double result = ((double)((double)count / (double)this.totalIDs)) * 100;
+        double result = ((double) ((double) count / (double) this.totalIDs)) * 100;
         System.out.println("Count : " + count + "/" + this.totalIDs + " result: " + result + "%");
         return result;
-    }
+    }   
 
     public class sinkThread extends Thread {
 
@@ -182,11 +188,90 @@ public class StartSimulationTask {
                 Range range = ranges.get(index);
                 world.printResult(range);
                 double result = countIDs();
-                if (result < stoppingCriteria) {
+                if (result < minCountId) {
+                    minCountId = result;
+                    stopCounting = 0;
+                } else {
+                    stopCounting++;
+                }
+
+                if (result < stoppingCriteria || stopCounting > 15) {
+                    printResult(world.getBugs());
                     break;
                 }
                 startCicle(range, world.getBugs(), world.getResult());
             }
         }
     }
+
+
+
+
+     public void printResult(List<Bug> bugs) {
+
+        Comparator<Result> c = new Comparator<Result>() {
+
+            public int compare(Result o1, Result o2) {
+                if (o1.count < o2.count) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        };
+
+
+        int contbug = 0;
+        for (Bug bug : bugs) {
+          //  if (bug.getSensitivity() > 0.5 && bug.getSpecificity() > 0.5) {
+                Result result = new Result();
+                result.Classifier = bug.getClassifierType().name();
+                List<Integer> ids = new ArrayList<Integer>();
+                for (PeakListRow row : bug.getRows()) {
+                    result.addValue(String.valueOf(row.getID()));
+                    ids.add(row.getID());
+                }
+
+                TestBug testing = new TestBug(ids, bug.getClassifierType(), training, validation);
+                double[] values = testing.prediction();
+                result.tspecificity = values[0];
+                result.tsensitivity = values[1];
+                result.aucT = values[2];
+                result.vspecificity = values[3];
+                result.vsensitivity = values[4];
+                result.aucV = values[5];
+                boolean isIt = false;
+                for (Result r : this.results) {
+                    if (r.isIt(result.getValues(), result.Classifier)) {
+                        r.count();
+                        isIt = true;
+                    }
+                }
+
+                if (!isIt) {
+                    this.results.add(result);
+                }
+
+                contbug++;
+            }
+        //}
+
+        Collections.sort(results, c);
+
+        contbug = 0;
+        String result = "";
+
+        for (Result r : results) {
+            result += r.toString();
+            contbug++;
+        }
+
+        this.textArea.setText(result);
+        System.out.println(result);
+
+    }
+
+
+
+
 }
