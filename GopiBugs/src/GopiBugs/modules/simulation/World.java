@@ -198,12 +198,12 @@ public class World {
                 if (newx > this.cellsPerSide - 1) {
                         newx = 1;
                 } else if (newx < 0) {
-                        newx = 99;
+                        newx = this.cellsPerSide - 1;
                 }
                 if (newy > this.cellsPerSide - 1) {
                         newy = 1;
                 } else if (newy < 0) {
-                        newy = 99;
+                        newy = this.cellsPerSide - 1;
                 }
                 bug.getCell().removeBug(bug);
                 bug.setPosition(newx, newy);
@@ -260,35 +260,6 @@ public class World {
                 }
         }
 
-        /*  public void saveBugs() throws IOException {
-
-        FileWriter fstream = new FileWriter("/home/bicha/Desktop/output.txt");
-        BufferedWriter out = new BufferedWriter(fstream);
-
-        for (Bug bug : this.population) {
-        if (bug.getSensitivity() > 0.6 && bug.getSpecificity() > 0.6 && bug.getAge() > 300) {
-        out.write(bug.getClassifierType().name());
-        out.write("\n");
-
-
-        for (PeakListRow row : bug.getRows()) {
-        out.write(String.valueOf(row.getID()));
-        out.write("\n");
-
-
-        }
-        out.write(String.valueOf(bug.getSensitivity()) + " - " + String.valueOf(bug.getSpecificity()) + " - " + bug.getAge());
-        out.write("\n");
-        out.write("--------------------------------------------------------------");
-        out.write("\n");
-
-
-
-        }
-        }
-        out.close();
-        fstream.close();
-        }*/
         public class Population implements Comparable<Bug> {
 
                 double specificity;

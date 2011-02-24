@@ -92,10 +92,10 @@ public class Bug {
                 if (row != null) {
                         this.rowList.add(row);
                 }
-                /* int n = rand.nextInt(classifiersEnum.values().length);
-                this.classifierType = classifiersEnum.values()[n];*/
+                int n = rand.nextInt(classifiersEnum.values().length);
+                this.classifierType = classifiersEnum.values()[n];
                 // if (rand.nextInt(1) == 0) {
-                this.classifierType = classifiersEnum.Logistic;
+                // this.classifierType = classifiersEnum.Logistic;
                 /*  } else {
                 this.classifierType = classifiersEnum.RandomForest;
                 }*/
@@ -158,12 +158,12 @@ public class Bug {
 
         public int mutation() {
                 /* int probability = rand.nextInt(10);
-                if (probability == 1) {
+                if (probability == 1) {*/
                 return rand.nextInt(this.MAXNUMBERGENES - 1);
-                } else {
+                /*  } else {
                 return 0;
                 }*/
-                return 0;
+                //   return 0;
         }
 
         public classifiersEnum getClassifierType() {

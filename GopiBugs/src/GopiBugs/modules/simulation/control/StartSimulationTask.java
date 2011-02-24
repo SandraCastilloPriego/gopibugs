@@ -192,7 +192,7 @@ public class StartSimulationTask {
                                         world.cicle();
                                 }
                                 int index = rand.nextInt(ranges.size() - 1);
-                                Range range = ranges.get(index);                               
+                                Range range = ranges.get(index);
                                 printResult(world.getBugs(), range);
                                 /* If the number of different variable combination doesn't change, the
                                 simulation will stop after 15 cicles.
@@ -206,7 +206,7 @@ public class StartSimulationTask {
                                         stopCounting++;
                                 }
                                 // Checking the stopping criteria
-                                if (result <= stoppingCriteria || stopCounting > 15) {                                        
+                                if (result <= stoppingCriteria || stopCounting > 15) {
                                         break;
                                 }
                                 startCicle(range, world.getBugs(), world.getResult());
@@ -228,33 +228,34 @@ public class StartSimulationTask {
                 };
 
                 for (Bug bug : bugs) {
-
-                        Result result = new Result();
-                        result.Classifier = bug.getClassifierType().name();
-                        List<Integer> ids = new ArrayList<Integer>();
-                        for (PeakListRow row : bug.getRows()) {
-                                result.addValue(String.valueOf(row.getID()));
-                                ids.add(row.getID());
-                        }
-
-                        TestBug testing = new TestBug(ids, bug.getClassifierType(), training, validation);
-                        double[] values = testing.prediction();
-                        result.tspecificity = values[0];
-                        result.tsensitivity = values[1];
-                        result.aucT = values[2];
-                        result.vspecificity = values[3];
-                        result.vsensitivity = values[4];
-                        result.aucV = values[5];
-                        boolean isIt = false;
-                        for (Result r : this.results) {
-                                if (r.isIt(result.getValues(), result.Classifier)) {
-                                        r.count();
-                                        isIt = true;
+                        if (bug.getAge() > this.bugLife/2) {
+                                Result result = new Result();
+                                result.Classifier = bug.getClassifierType().name();
+                                List<Integer> ids = new ArrayList<Integer>();
+                                for (PeakListRow row : bug.getRows()) {
+                                        result.addValue(String.valueOf(row.getID()));
+                                        ids.add(row.getID());
                                 }
-                        }
 
-                        if (!isIt) {
-                                this.results.add(result);
+                                TestBug testing = new TestBug(ids, bug.getClassifierType(), training, validation);
+                                double[] values = testing.prediction();
+                                result.tspecificity = values[0];
+                                result.tsensitivity = values[1];
+                                result.aucT = values[2];
+                                result.vspecificity = values[3];
+                                result.vsensitivity = values[4];
+                                result.aucV = values[5];
+                                boolean isIt = false;
+                                for (Result r : this.results) {
+                                        if (r.isIt(result.getValues(), result.Classifier)) {
+                                                r.count();
+                                                isIt = true;
+                                        }
+                                }
+
+                                if (!isIt) {
+                                        this.results.add(result);
+                                }
                         }
 
                 }
