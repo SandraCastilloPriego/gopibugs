@@ -192,10 +192,9 @@ public class StartSimulationTask {
                                         world.cicle();
                                 }
                                 int index = rand.nextInt(ranges.size() - 1);
-                                Range range = ranges.get(index);
-                                world.printResult(range);
-
-                                /* If the number of different variable IDs doesn't change, the
+                                Range range = ranges.get(index);                               
+                                printResult(world.getBugs(), range);
+                                /* If the number of different variable combination doesn't change, the
                                 simulation will stop after 15 cicles.
                                  */
                                 // Counting the number of variables in the world
@@ -207,8 +206,7 @@ public class StartSimulationTask {
                                         stopCounting++;
                                 }
                                 // Checking the stopping criteria
-                                if (result < stoppingCriteria || stopCounting > 15) {
-                                        printResult(world.getBugs());
+                                if (result <= stoppingCriteria || stopCounting > 15) {                                        
                                         break;
                                 }
                                 startCicle(range, world.getBugs(), world.getResult());
@@ -216,7 +214,7 @@ public class StartSimulationTask {
                 }
         }
 
-        public void printResult(List<Bug> bugs) {
+        public void printResult(List<Bug> bugs, Range range) {
 
                 Comparator<Result> c = new Comparator<Result>() {
 
@@ -229,10 +227,8 @@ public class StartSimulationTask {
                         }
                 };
 
-
-                int contbug = 0;
                 for (Bug bug : bugs) {
-                        //  if (bug.getSensitivity() > 0.5 && bug.getSpecificity() > 0.5) {
+
                         Result result = new Result();
                         result.Classifier = bug.getClassifierType().name();
                         List<Integer> ids = new ArrayList<Integer>();
@@ -261,22 +257,24 @@ public class StartSimulationTask {
                                 this.results.add(result);
                         }
 
-                        contbug++;
                 }
-                //}
+
 
                 Collections.sort(results, c);
 
-                contbug = 0;
-                String result = "";
+
+                int contbug = 0;
+                String result = range.toString() + " \n";
 
                 for (Result r : results) {
                         result += r.toString();
                         contbug++;
+                        if (contbug > 10) {
+                                break;
+                        }
                 }
 
                 this.textArea.setText(result);
-                System.out.println(result);
 
         }
 }

@@ -238,7 +238,7 @@ public class SimpleBasicDataset implements BugDataset {
         return newDataset;
     }
 
-    public void setSampleType(String sampleName, String type) {
+    public void setSampleType(String sampleName, String type) {            
         this.sampleType.put(sampleName, type);
     }
 
