@@ -228,7 +228,7 @@ public class StartSimulationTask {
                 };
 
                 for (Bug bug : bugs) {
-                        if (bug.getAge() > this.bugLife/2) {
+                        if (bug.getAge() > this.bugLife/2 && bug.getAreaUnderTheCurve() > 0.5) {
                                 Result result = new Result();
                                 result.Classifier = bug.getClassifierType().name();
                                 List<Integer> ids = new ArrayList<Integer>();
