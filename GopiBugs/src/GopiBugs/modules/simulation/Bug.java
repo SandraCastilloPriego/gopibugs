@@ -97,7 +97,7 @@ public class Bug {
                 // if (rand.nextInt(1) == 0) {
                 // this.classifierType = classifiersEnum.Logistic;
                 /*  } else {
-                this.classifierType = classifiersEnum.RandomForest;
+                 this.classifierType = classifiersEnum.RandomForest;
                 }*/
                 this.classify(cell.getRange());
                 this.life = bugLife;
@@ -147,24 +147,13 @@ public class Bug {
 
         public void orderPurgeGenes() {
                 int removeGenes = this.rowList.size() - this.MAXNUMBERGENES;
-                if (removeGenes > 0) {
-                        int mutation = this.mutation();
-                        for (int i = 0; i < removeGenes + mutation; i++) {
+                if (removeGenes > 0) {                       
+                        for (int i = 0; i < removeGenes ; i++) {
                                 int index = rand.nextInt(this.rowList.size() - 1);
                                 this.rowList.remove(index);
                         }
                 }
-        }
-
-        public int mutation() {
-                /* int probability = rand.nextInt(10);
-                if (probability == 1) {*/
-                return rand.nextInt(this.MAXNUMBERGENES - 1);
-                /*  } else {
-                return 0;
-                }*/
-                //   return 0;
-        }
+        }       
 
         public classifiersEnum getClassifierType() {
                 return this.classifierType;
