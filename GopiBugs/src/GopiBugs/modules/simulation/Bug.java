@@ -223,7 +223,7 @@ public class Bug {
                 }
         }
 
-        private void classify(Range range) {
+        public void classify(Range range) {
                 try {
                         Instances data = getWekaDataset(range);
                         classifier = setClassifier();
@@ -365,7 +365,7 @@ public class Bug {
 
         }
 
-        public double getAreaUnderTheCurve() {
+        public double getSpecSenAverage() {
                 double value = (this.getSpecificity() + this.getSensitivity()) / 2;
                 if (value != Double.NaN) {
                         return value;

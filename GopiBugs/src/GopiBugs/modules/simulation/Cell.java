@@ -73,7 +73,7 @@ public class Cell {
             Comparator<Bug> c = new Comparator<Bug>() {
 
                 public int compare(Bug o1, Bug o2) {
-                    if (o1.getAreaUnderTheCurve() < o2.getAreaUnderTheCurve()) {
+                    if (o1.getSpecSenAverage() < o2.getSpecSenAverage()) {
                         return 1;
                     } else {
                         return -1;
@@ -85,7 +85,7 @@ public class Cell {
                 Collections.sort(bugsInside, c);
                 Bug mother = bugsInside.get(0);
                 for (Bug father : this.bugsInside) {
-                    if (mother != father && father.isClassify() && mother.isClassify() && mother.getAreaUnderTheCurve() > 0.55 && father.getAreaUnderTheCurve() > 0.55 && mother.getAge() > 100 && father.getAge() > 100) {
+                    if (mother != father && father.isClassify() && mother.isClassify() && mother.getSpecSenAverage() > 0.55 && father.getSpecSenAverage() > 0.55 && mother.getAge() > 100 && father.getAge() > 100) {
                         childs.add(new Bug(mother, father, mother.getDataset(), bugLife));
                     }
                 }

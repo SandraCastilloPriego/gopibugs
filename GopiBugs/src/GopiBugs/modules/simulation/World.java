@@ -86,10 +86,10 @@ public class World {
                                 }
                         } else {
                                 this.population = bugs;
-                               /* for (Bug bug : this.population) {
+                                for (Bug bug : this.population) {
                                         bug.classify(range);
 
-                                }*/
+                                }
                         }
                 }
         }
@@ -230,7 +230,7 @@ public class World {
                 Comparator<Bug> c = new Comparator<Bug>() {
 
                         public int compare(Bug o1, Bug o2) {
-                                if (o1.getAreaUnderTheCurve() < o2.getAreaUnderTheCurve()) {
+                                if (o1.getSpecSenAverage() < o2.getSpecSenAverage()) {
                                         return 1;
                                 } else {
                                         return -1;

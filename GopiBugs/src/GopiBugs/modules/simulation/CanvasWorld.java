@@ -60,13 +60,13 @@ public class CanvasWorld extends Canvas {
 
                 if (bug.getAge() < 200) {
                     offgc.setColor(Color.ORANGE);
-                } else if (bug.getAreaUnderTheCurve() > 0.75) {
+                } else if (bug.getSpecSenAverage() > 0.75) {
                     offgc.setColor(Color.RED);
-                } else if (bug.getAreaUnderTheCurve() > 0.6) {
+                } else if (bug.getSpecSenAverage() > 0.6) {
                     offgc.setColor(Color.BLUE);
-                } else if (bug.getAreaUnderTheCurve() > 0.5) {
+                } else if (bug.getSpecSenAverage() > 0.5) {
                     offgc.setColor(Color.GREEN);
-                } else if (bug.getAreaUnderTheCurve() > 0.4) {
+                } else if (bug.getSpecSenAverage() > 0.4) {
                     offgc.setColor(Color.YELLOW);
                 } 
                 offgc.fillRect(n_x, n_y, (int) cellSize, (int) cellSize);

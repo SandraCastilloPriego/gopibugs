@@ -186,14 +186,21 @@ public class StartSimulationTask {
                 @Override
                 public void run() {
                         while (1 == 1) {
+                                long time = System.currentTimeMillis();
+                                System.out.println(" The test took 0 " + time + " milliseconds");
+
                                 for (int i = 0; i < iterations; i++) {
                                         // Paints the graphics
                                         canvas.update(canvas.getGraphics());
                                         world.cicle();
                                 }
+                                time = System.currentTimeMillis() - time;
+                                System.out.println(" The test took 1 " + time + " milliseconds");
                                 int index = rand.nextInt(ranges.size() - 1);
                                 Range range = ranges.get(index);
                                 printResult(world.getBugs(), range);
+                                time = System.currentTimeMillis() - time;
+                                System.out.println(" The test took2 " + time + " milliseconds");
                                 /* If the number of different variable combination doesn't change, the
                                 simulation will stop after 15 cicles.
                                  */
@@ -205,11 +212,15 @@ public class StartSimulationTask {
                                 } else {
                                         stopCounting++;
                                 }
+                                time = System.currentTimeMillis() - time;
+                                System.out.println(" The test took 3" + time + " milliseconds");
                                 // Checking the stopping criteria
                                 if (result <= stoppingCriteria || stopCounting > 15) {
                                         break;
                                 }
                                 startCicle(range, world.getBugs(), world.getResult());
+                                time = System.currentTimeMillis() - time;
+                                System.out.println(" The test took 4" + time + " milliseconds");
                         }
                 }
         }
@@ -228,7 +239,7 @@ public class StartSimulationTask {
                 };
 
                 for (Bug bug : bugs) {
-                        if (bug.getAge() > this.bugLife/2 && bug.getAreaUnderTheCurve() > 0.5) {
+                        if (bug.getAge() > (this.bugLife / 3)*2 && bug.getSpecSenAverage() > 0.9) {
                                 Result result = new Result();
                                 result.Classifier = bug.getClassifierType().name();
                                 List<Integer> ids = new ArrayList<Integer>();
