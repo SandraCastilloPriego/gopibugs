@@ -19,12 +19,8 @@ package GopiBugs.util.components;
 
 import GopiBugs.data.BugDataset;
 import GopiBugs.data.PeakListRow;
-import GopiBugs.data.datamodels.DatasetLCMSDataModel;
-import GopiBugs.data.datamodels.DatasetGCGCDataModel;
 import GopiBugs.data.datamodels.OtherDataModel;
 import GopiBugs.data.DatasetType;
-import GopiBugs.data.impl.datasets.SimpleGCGCDataset;
-import GopiBugs.data.impl.datasets.SimpleLCMSDataset;
 import GopiBugs.data.impl.datasets.SimpleBasicDataset;
 import GopiBugs.data.impl.peaklists.SimplePeakListRowGCGC;
 import GopiBugs.data.impl.peaklists.SimplePeakListRowLCMS;
@@ -52,13 +48,7 @@ public class FileUtils {
 
     public static BugDataset getDataset(BugDataset dataset, String Name) {
         BugDataset newDataset = null;
-        switch (dataset.getType()) {
-            case LCMS:
-                newDataset = new SimpleLCMSDataset(Name + dataset.getDatasetName());
-                break;
-            case GCGCTOF:
-                newDataset = new SimpleGCGCDataset(Name + dataset.getDatasetName());
-                break;
+        switch (dataset.getType()) {           
             case TRAINING:
             case VALIDATION:
                 newDataset = new SimpleBasicDataset(Name + dataset.getDatasetName());
@@ -70,13 +60,7 @@ public class FileUtils {
 
     public static DataTableModel getTableModel(BugDataset dataset) {
         DataTableModel model = null;
-        switch (dataset.getType()) {
-            case LCMS:
-                model = new DatasetLCMSDataModel(dataset);
-                break;
-            case GCGCTOF:
-                model = new DatasetGCGCDataModel(dataset);
-                break;
+        switch (dataset.getType()) {           
             case TRAINING:
             case VALIDATION:
                 model = new OtherDataModel(dataset);

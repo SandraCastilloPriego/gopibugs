@@ -20,11 +20,6 @@ package GopiBugs.desktop.impl;
 import GopiBugs.data.StorableParameterSet;
 import GopiBugs.data.impl.SimpleParameterSet;
 import GopiBugs.main.GopiBugsCore;
-import GopiBugs.modules.configuration.proxy.ProxyConfigurationParameters;
-import GopiBugs.modules.configuration.tables.GCGC.GCGCColumnsViewParameters;
-import GopiBugs.modules.configuration.tables.LCMS.LCMSColumnsViewParameters;
-import GopiBugs.modules.file.saveGCGCFile.SaveGCGCParameters;
-import GopiBugs.modules.file.saveLCMSFile.SaveLCMSParameters;
 import GopiBugs.modules.file.saveOtherFile.SaveOtherParameters;
 import GopiBugs.util.NumberFormatter;
 import GopiBugs.util.NumberFormatter.FormatterType;
@@ -74,9 +69,7 @@ public class DesktopParameters implements StorableParameterSet,
     private String lastSavePath = "";
     private String lastMyllyPath = " ";
     private String normalizationPath = " ";
-    private SimpleParameterSet LCMSViewParameters, GCGCViewParameters;
-    private SimpleParameterSet SaveLCMSParameters, SaveGCGCParameters, SaveOtherParameters;
-    private SimpleParameterSet proxy;
+    private SimpleParameterSet SaveOtherParameters;
     public final Hashtable<String, Range> standards;
 
     DesktopParameters() {
@@ -91,10 +84,6 @@ public class DesktopParameters implements StorableParameterSet,
         this.rtFormat = rtFormat;
         this.intensityFormat = intensityFormat;
 
-        LCMSViewParameters = new LCMSColumnsViewParameters();
-        GCGCViewParameters = new GCGCColumnsViewParameters();
-        SaveLCMSParameters = new SaveLCMSParameters();
-        SaveGCGCParameters = new SaveGCGCParameters();
         SaveOtherParameters = new SaveOtherParameters();
 
         MainWindow mainWindow = (MainWindow) GopiBugsCore.getDesktop();
@@ -109,47 +98,8 @@ public class DesktopParameters implements StorableParameterSet,
 
     public Hashtable getStandards() {
         return this.standards;
-    }
+    }  
 
-    public SimpleParameterSet getProxyParameters() {
-        return proxy;
-    }
-
-    public void setProxyParameters(ProxyConfigurationParameters proxy) {
-        this.proxy = proxy;
-    }
-
-    public SimpleParameterSet getViewLCMSParameters() {
-        return LCMSViewParameters;
-    }
-
-    public void setViewLCMSParameters(LCMSColumnsViewParameters LCMSViewParameters) {
-        this.LCMSViewParameters = LCMSViewParameters;
-    }
-
-    public SimpleParameterSet getViewGCGCParameters() {
-        return GCGCViewParameters;
-    }
-
-    public void setViewGCGCParameters(GCGCColumnsViewParameters GCGCViewParameters) {
-        this.GCGCViewParameters = GCGCViewParameters;
-    }
-
-    public SimpleParameterSet getSaveLCMSParameters() {
-        return SaveLCMSParameters;
-    }
-
-    public void setSaveLCMSParameters(SimpleParameterSet SaveDatasetParameters) {
-        this.SaveLCMSParameters = SaveDatasetParameters;
-    }
-
-    public SimpleParameterSet getSaveGCGCParameters() {
-        return SaveGCGCParameters;
-    }
-
-    public void setSaveGCGCParameters(SimpleParameterSet SaveDatasetParameters) {
-        this.SaveGCGCParameters = SaveDatasetParameters;
-    }
 
     public SimpleParameterSet getSaveOtherParameters() {
         return SaveOtherParameters;
@@ -349,10 +299,6 @@ public class DesktopParameters implements StorableParameterSet,
         element.addElement(NORMALIZATION_PATH_ELEMENT_NAME).setText(
                 normalizationPath);
 
-        LCMSViewParameters.exportValuesToXML(element);
-        GCGCViewParameters.exportValuesToXML(element);
-        SaveLCMSParameters.exportValuesToXML(element);
-        SaveGCGCParameters.exportValuesToXML(element);
         SaveOtherParameters.exportValuesToXML(element);
 
         Set<String> set = this.standards.keySet();
@@ -415,10 +361,6 @@ public class DesktopParameters implements StorableParameterSet,
         lastMyllyPath = element.elementText(LAST_MYLLY_PATH_ELEMENT_NAME);
         normalizationPath = element.elementText(NORMALIZATION_PATH_ELEMENT_NAME);
 
-        LCMSViewParameters.importValuesFromXML(element);
-        GCGCViewParameters.importValuesFromXML(element);
-        SaveLCMSParameters.importValuesFromXML(element);
-        SaveGCGCParameters.importValuesFromXML(element);
         SaveOtherParameters.importValuesFromXML(element);
 
         i = element.elements(STANDARD_RANGE).iterator();

@@ -86,10 +86,10 @@ public class World {
                                 }
                         } else {
                                 this.population = bugs;
-                                for (Bug bug : this.population) {
+                               /* for (Bug bug : this.population) {
                                         bug.classify(range);
 
-                                }
+                                }*/
                         }
                 }
         }

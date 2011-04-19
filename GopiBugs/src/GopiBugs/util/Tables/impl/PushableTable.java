@@ -17,7 +17,6 @@
  */
 package GopiBugs.util.Tables.impl;
 
-import GopiBugs.data.LCMSColumnName;
 import GopiBugs.data.DatasetType;
 import GopiBugs.util.Tables.DataTable;
 import GopiBugs.util.Tables.DataTableModel;
@@ -65,11 +64,11 @@ public class PushableTable implements DataTable, ActionListener {
         private StringSelection stsel;
         private Vector<register> registers;
         int indexRegister = 0;
-       
+
         public PushableTable() {
                 registers = new Vector<register>();
         }
-       
+
         public PushableTable(DataTableModel model) {
                 this.model = model;
                 table = this.tableRowsColor(model);
@@ -111,12 +110,7 @@ public class PushableTable implements DataTable, ActionListener {
                                 Component comp = super.prepareRenderer(renderer, Index_row, Index_col);
                                 try {
                                         // Coloring conditions
-                                        if (getStandard(Index_row)) {
-                                                comp.setBackground(Color.yellow);
-                                                if (comp.getBackground().getRGB() != Color.yellow.getRGB() || comp.getBackground().getRGB() != Color.ORANGE.getRGB()) {
-                                                        this.repaint();
-                                                }
-                                        } else if (isDataSelected(Index_row)) {
+                                        if (isDataSelected(Index_row)) {
                                                 comp.setBackground(new Color(173, 205, 203));
                                                 if (comp.getBackground().getRGB() != new Color(173, 205, 203).getRGB()) {
                                                         this.repaint();
@@ -148,26 +142,6 @@ public class PushableTable implements DataTable, ActionListener {
 
 
                 return colorTable;
-        }
-
-        /**
-         * Says whether the row of LCMS data set is an standard or not.
-         *
-         * @param row
-         * @return
-         */
-        public boolean getStandard(int row) {
-                try {
-                        for (int i = 0; i < this.getTable().getColumnCount(); i++) {
-                                String columnName = this.getTable().getColumnName(i);
-                                if (columnName.matches(LCMSColumnName.STANDARD.getRegularExpression())) {
-                                        return (Boolean) this.getTable().getValueAt(row, i);
-                                }
-                        }
-                        return false;
-                } catch (Exception e) {
-                        return false;
-                }
         }
 
         /**
@@ -255,8 +229,8 @@ public class PushableTable implements DataTable, ActionListener {
                 try {
                         ToolTipHeader toolheader;
                         String[] toolTipStr = new String[model.getColumnCount()];
-                        for (int i = 0; i <
-                                model.getColumnCount(); i++) {
+                        for (int i = 0; i
+                                < model.getColumnCount(); i++) {
                                 toolTipStr[i] = model.getColumnName(i);
                         }
 
@@ -280,10 +254,10 @@ public class PushableTable implements DataTable, ActionListener {
                         int numrows = table.getSelectedRowCount();
                         int[] rowsselected = table.getSelectedRows();
                         int[] colsselected = table.getSelectedColumns();
-                        if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] &&
-                                numrows == rowsselected.length) &&
-                                (numcols - 1 == colsselected[colsselected.length - 1] - colsselected[0] &&
-                                numcols == colsselected.length))) {
+                        if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0]
+                                && numrows == rowsselected.length)
+                                && (numcols - 1 == colsselected[colsselected.length - 1] - colsselected[0]
+                                && numcols == colsselected.length))) {
                                 JOptionPane.showMessageDialog(null, "Invalid Copy Selection",
                                         "Invalid Copy Selection",
                                         JOptionPane.ERROR_MESSAGE);
@@ -329,8 +303,8 @@ public class PushableTable implements DataTable, ActionListener {
                                         StringTokenizer st2 = new StringTokenizer(rowstring, "\t");
                                         for (int j = 0; st2.hasMoreTokens(); j++) {
                                                 value = st2.nextToken();
-                                                if (startRow + i < table.getRowCount() &&
-                                                        startCol + j < table.getColumnCount()) {
+                                                if (startRow + i < table.getRowCount()
+                                                        && startCol + j < table.getColumnCount()) {
                                                         table.setValueAt(value, startRow + i, startCol + j);
                                                 }
                                         }

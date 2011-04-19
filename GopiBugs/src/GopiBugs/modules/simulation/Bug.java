@@ -92,12 +92,13 @@ public class Bug {
                 if (row != null) {
                         this.rowList.add(row);
                 }
-                int n = rand.nextInt(classifiersEnum.values().length);
-                this.classifierType = classifiersEnum.values()[n];
+                this.classifierType = classifiersEnum.RandomForest;
+              //  int n = rand.nextInt(classifiersEnum.values().length);
+              //  this.classifierType = classifiersEnum.values()[n];
                 // if (rand.nextInt(1) == 0) {
                 // this.classifierType = classifiersEnum.Logistic;
                 /*  } else {
-                 this.classifierType = classifiersEnum.RandomForest;
+                 
                 }*/
                 this.classify(cell.getRange());
                 this.life = bugLife;
@@ -105,7 +106,7 @@ public class Bug {
 
         @Override
         public Bug clone() {
-                Bug newBug = new Bug(this.x, this.y, this.cell, null, this.dataset, this.life);
+                Bug newBug = new Bug(this.x, this.y, this.cell, null, this.dataset, this.life);                        
                 newBug.rowList = this.getRows();
                 return newBug;
         }
@@ -137,7 +138,7 @@ public class Bug {
                 this.life = bugLife;
         }
 
-        public void assingGenes(Bug parent, int plus) {
+        private void assingGenes(Bug parent, int plus) {
                 for (PeakListRow row : parent.getRows()) {
                         if (!this.rowList.contains(row)) {
                                 this.rowList.add(row);
@@ -145,7 +146,7 @@ public class Bug {
                 }
         }
 
-        public void orderPurgeGenes() {
+        private void orderPurgeGenes() {
                 int removeGenes = this.rowList.size() - this.MAXNUMBERGENES;
                 if (removeGenes > 0) {                       
                         for (int i = 0; i < removeGenes ; i++) {
@@ -212,7 +213,7 @@ public class Bug {
 
         boolean isDead() {
                 life -= 1;
-                if (this.rowList.size() == 0) {
+                if (this.rowList.isEmpty()) {
                         life = 0;
                 }
                 if (this.life < 1 || this.life == Double.NaN) {
@@ -222,7 +223,7 @@ public class Bug {
                 }
         }
 
-        public void classify(Range range) {
+        private void classify(Range range) {
                 try {
                         Instances data = getWekaDataset(range);
                         classifier = setClassifier();

@@ -17,9 +17,7 @@
  */
 package GopiBugs.util;
 
-import GopiBugs.data.GCGCColumnName;
 import GopiBugs.data.PeakListRow;
-import GopiBugs.data.LCMSColumnName;
 import java.util.Comparator;
 
 /**
@@ -81,16 +79,6 @@ public class PeakListRowSorter implements Comparator<PeakListRow> {
                                 }
                                 double medianHeight = MathUtils.calcQuantile(peakHeights, 0.5);
                                 return medianHeight;
-                        case MZ:
-                                if (row.getClass().toString().contains("LCMS")) {
-                                        return (Double) row.getVar(LCMSColumnName.MZ.getGetFunctionName());
-                                }
-                        case RT:
-                                if (row.getClass().toString().contains("LCMS")) {
-                                        return (Double) row.getVar(LCMSColumnName.RT.getGetFunctionName());
-                                } else if (row.getClass().toString().contains("GCGC")) {
-                                         return (Double) row.getVar(GCGCColumnName.RT1.getGetFunctionName());
-                                }
                         case ID:
                                 return row.getID();
                 }
