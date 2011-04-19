@@ -15,18 +15,22 @@
  * GopiBugs; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
  * Fifth Floor, Boston, MA 02110-1301 USA
  */
-package GopiBugs.modules.configuration.parameters;
+package GopiBugs.modules.configuration;
 
 import GopiBugs.data.BugDataset;
 import GopiBugs.data.ParameterSet;
+import GopiBugs.data.impl.SimpleParameterSet;
 import GopiBugs.desktop.Desktop;
 import GopiBugs.desktop.GopiBugsMenu;
+import GopiBugs.desktop.impl.DesktopParameters;
 import GopiBugs.main.GopiBugsCore;
 import GopiBugs.main.GopiBugsModule;
 import GopiBugs.taskcontrol.Task;
 import GopiBugs.taskcontrol.TaskListener;
 import GopiBugs.taskcontrol.TaskStatus;
 import GopiBugs.util.GUIUtils;
+import GopiBugs.util.dialogs.ExitCode;
+import GopiBugs.util.dialogs.ParameterSetupDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -36,31 +40,37 @@ import java.util.logging.Logger;
  *
  * @author scsandra
  */
-public class ParameterConfiguration implements GopiBugsModule, TaskListener, ActionListener {
+public class Configuration implements GopiBugsModule, TaskListener, ActionListener {
 
         private Logger logger = Logger.getLogger(this.getClass().getName());
         private Desktop desktop;
         final String helpID = GUIUtils.generateHelpID(this);
+        SimpleParameterSet configurationParameters;
+        private DesktopParameters deskParameters;
 
         public void initModule() {
-
+                this.configurationParameters = new ConfigurationParameters();
                 this.desktop = GopiBugsCore.getDesktop();
-                desktop.addMenuItem(GopiBugsMenu.CONFIGURATION, "Parameters Configuration..",
-                        "Parameters configuration", KeyEvent.VK_P, this, null, null);
+
+                desktop.addMenuItem(GopiBugsMenu.CONFIGURATION, "Configuration..",
+                        "Configuration", KeyEvent.VK_C, this, null, null);
+
+                deskParameters = (DesktopParameters) desktop.getParameterSet();
+                deskParameters.setSaveConfigurationParameters(configurationParameters);
         }
 
         public void taskStarted(Task task) {
-                logger.info("Parameters configuration");
+                logger.info("Configuration");
         }
 
         public void taskFinished(Task task) {
                 if (task.getStatus() == TaskStatus.FINISHED) {
-                        logger.info("Finished Parameters configuration ");
+                        logger.info("Finished Configuration ");
                 }
 
                 if (task.getStatus() == TaskStatus.ERROR) {
 
-                        String msg = "Error while Parameters configuration  .. ";
+                        String msg = "Error while Configuration  .. ";
                         logger.severe(msg);
                         desktop.displayErrorMessage(msg);
 
@@ -68,21 +78,32 @@ public class ParameterConfiguration implements GopiBugsModule, TaskListener, Act
         }
 
         public void actionPerformed(ActionEvent e) {
-                BugDataset[] dataset = desktop.getSelectedDataFiles();
-                if (dataset.length > 0) {
-                        ParameterDialog dialog = new ParameterDialog("Data parameters configuration", helpID, dataset[0]);
+                ExitCode exitCode = setupParameters();
+                if (exitCode != ExitCode.OK) {
+                        return;
+                }
+                deskParameters.setSaveConfigurationParameters(configurationParameters);
+        }
+
+        public ExitCode setupParameters() {
+                try {
+                        ParameterSetupDialog dialog = new ParameterSetupDialog("Configuration parameters", configurationParameters);
                         dialog.setVisible(true);
+                        return dialog.getExitCode();
+                } catch (Exception exception) {
+                        return ExitCode.CANCEL;
                 }
         }
 
         public ParameterSet getParameterSet() {
-                return null;
+                return this.configurationParameters;
         }
 
         public void setParameters(ParameterSet parameterValues) {
+                this.configurationParameters = (SimpleParameterSet) parameterValues;
         }
 
         public String toString() {
-                return "Parameters configuration";
+                return "Configuration";
         }
 }

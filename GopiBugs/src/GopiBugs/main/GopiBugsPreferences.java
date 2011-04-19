@@ -19,12 +19,9 @@ package GopiBugs.main;
 
 import GopiBugs.data.StorableParameterSet;
 import GopiBugs.desktop.impl.MainWindow;
-import GopiBugs.util.NumberFormatter;
-import GopiBugs.util.NumberFormatter.FormatterType;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
-import java.util.Iterator;
 
 
 import org.dom4j.Element;
@@ -36,9 +33,7 @@ import org.dom4j.Element;
 public class GopiBugsPreferences implements StorableParameterSet {
 
     public static final String FORMAT_ELEMENT_NAME = "format";
-    public static final String FORMAT_TYPE_ATTRIBUTE_NAME = "type";
-    public static final String FORMAT_TYPE_ATTRIBUTE_MZ = "m/z";
-    public static final String FORMAT_TYPE_ATTRIBUTE_RT = "Retention time";
+    public static final String FORMAT_TYPE_ATTRIBUTE_NAME = "type";   
     public static final String FORMAT_TYPE_ATTRIBUTE_INT = "Intensity";
     public static final String MAINWINDOW_ELEMENT_NAME = "mainwindow";
     public static final String X_ELEMENT_NAME = "x";
@@ -46,47 +41,14 @@ public class GopiBugsPreferences implements StorableParameterSet {
     public static final String WIDTH_ELEMENT_NAME = "width";
     public static final String HEIGHT_ELEMENT_NAME = "height";
     public static final String THREADS_ELEMENT_NAME = "threads";
-    public static final String PROXY = "proxy_settings";
-    public static final String PROXY_ADDRESS = "proxy_address";
-    public static final String PROXY_PORT = "proxy_port";
-    public static final String STANDARD_RANGE = "standard_ranges";
-    public static final String STANDARD_NAME = "standard_ranges";
-    public static final int MAXIMIZED = -1;
-    private NumberFormatter mzFormat, rtFormat, intensityFormat;
+    public static final int MAXIMIZED = -1;  
     private int mainWindowX, mainWindowY, mainWindowWidth, mainWindowHeight;
     private boolean autoNumberOfThreads = true;
     private int manualNumberOfThreads = 2;
-    private boolean proxyServer = false;
-    private String proxyAddress = "";
-    private String proxyPort = "";
 
-    public GopiBugsPreferences() {
-        this.mzFormat = new NumberFormatter(FormatterType.NUMBER, "0.000");
-        this.rtFormat = new NumberFormatter(FormatterType.TIME, "m:ss");
-        this.intensityFormat = new NumberFormatter(FormatterType.NUMBER,
-                "0.00E0");
+    public GopiBugsPreferences() {       
     }
-
-    /**
-     * @return Returns the intensityFormat.
-     */
-    public NumberFormatter getIntensityFormat() {
-        return intensityFormat;
-    }
-
-    /**
-     * @return Returns the mzFormat.
-     */
-    public NumberFormatter getMZFormat() {
-        return mzFormat;
-    }
-
-    /**
-     * @return Returns the rtFormat.
-     */
-    public NumberFormatter getRTFormat() {
-        return rtFormat;
-    }
+  
 
 
     public void exportValuesToXML(Element element) {
@@ -106,22 +68,7 @@ public class GopiBugsPreferences implements StorableParameterSet {
             mainWindowHeight = MAXIMIZED;
         } else {
             mainWindowHeight = size.height;
-        }
-
-        Element mzFormatElement = element.addElement(FORMAT_ELEMENT_NAME);
-        mzFormatElement.addAttribute(FORMAT_TYPE_ATTRIBUTE_NAME,
-                FORMAT_TYPE_ATTRIBUTE_MZ);
-        mzFormat.exportToXML(mzFormatElement);
-
-        Element rtFormatElement = element.addElement(FORMAT_ELEMENT_NAME);
-        rtFormatElement.addAttribute(FORMAT_TYPE_ATTRIBUTE_NAME,
-                FORMAT_TYPE_ATTRIBUTE_RT);
-        rtFormat.exportToXML(rtFormatElement);
-
-        Element intensityFormatElement = element.addElement(FORMAT_ELEMENT_NAME);
-        intensityFormatElement.addAttribute(FORMAT_TYPE_ATTRIBUTE_NAME,
-                FORMAT_TYPE_ATTRIBUTE_INT);
-        intensityFormat.exportToXML(intensityFormatElement);
+        }       
 
         Element mainWindowElement = element.addElement(MAINWINDOW_ELEMENT_NAME);
         mainWindowElement.addElement(X_ELEMENT_NAME).setText(
@@ -137,38 +84,12 @@ public class GopiBugsPreferences implements StorableParameterSet {
         if (autoNumberOfThreads) {
             threadsElement.addAttribute("auto", "true");
         }
-        threadsElement.setText(String.valueOf(manualNumberOfThreads));
-
-
-        //Proxy Settings
-        Element proxyElement = element.addElement(PROXY);
-        if (proxyServer) {
-            proxyElement.addAttribute("activated", "true");
-        }
-
-        Element addressElement = proxyElement.addElement(PROXY_ADDRESS);
-        addressElement.setText(String.valueOf(proxyAddress));
-        Element portElement = proxyElement.addElement(PROXY_PORT);
-        portElement.setText(String.valueOf(proxyPort));
+        threadsElement.setText(String.valueOf(manualNumberOfThreads));        
 
     }
 
 
-    public void importValuesFromXML(Element element) {
-        Iterator i = element.elements(FORMAT_ELEMENT_NAME).iterator();
-        while (i.hasNext()) {
-            Element formatElement = (Element) i.next();
-            if (formatElement.attributeValue(FORMAT_TYPE_ATTRIBUTE_NAME).equals(FORMAT_TYPE_ATTRIBUTE_MZ)) {
-                mzFormat.importFromXML(formatElement);
-            }
-            if (formatElement.attributeValue(FORMAT_TYPE_ATTRIBUTE_NAME).equals(FORMAT_TYPE_ATTRIBUTE_RT)) {
-                rtFormat.importFromXML(formatElement);
-            }
-            if (formatElement.attributeValue(FORMAT_TYPE_ATTRIBUTE_NAME).equals(FORMAT_TYPE_ATTRIBUTE_INT)) {
-                intensityFormat.importFromXML(formatElement);
-            }
-        }
-
+    public void importValuesFromXML(Element element) {        
         Element mainWindowElement = element.element(MAINWINDOW_ELEMENT_NAME);
         if (mainWindowElement != null) {
             mainWindowX = Integer.parseInt(mainWindowElement.elementText(X_ELEMENT_NAME));
@@ -201,23 +122,7 @@ public class GopiBugsPreferences implements StorableParameterSet {
         if (threadsElement != null) {
             autoNumberOfThreads = (threadsElement.attributeValue("auto") != null);
             manualNumberOfThreads = Integer.parseInt(threadsElement.getText());
-        }
-
-        //Proxy settings
-        Element proxyElement = element.element(PROXY);
-        if (proxyElement != null) {
-            proxyServer = (proxyElement.attributeValue("activated") != null);
-
-            Element AddressElement = proxyElement.element(PROXY_ADDRESS);
-            if (AddressElement != null) {
-                setProxyAddress(AddressElement.getText());
-            }
-
-            Element portElement = proxyElement.element(PROXY_PORT);
-            if (portElement != null) {
-                setProxyPort(portElement.getText());
-            }
-        }
+        }      
 
     }
 
@@ -240,39 +145,4 @@ public class GopiBugsPreferences implements StorableParameterSet {
     public void setManualNumberOfThreads(int manualNumberOfThreads) {
         this.manualNumberOfThreads = manualNumberOfThreads;
     }
-
-    // Proxy settings
-    public boolean isProxy() {
-        return proxyServer;
-    }
-
-    public void setProxy(boolean proxy) {
-        this.proxyServer = proxy;
-        if (!proxy) {
-            System.clearProperty("http.proxyHost");
-            System.clearProperty("http.proxyPort");
-        }
-    }
-
-    public String getProxyAddress() {
-        return proxyAddress;
-    }
-
-    public void setProxyAddress(String address) {
-        this.proxyAddress = address;
-        if (isProxy()) {
-            System.setProperty("http.proxyHost", address);
-        }
-    }
-
-    public String getProxyPort() {
-        return proxyPort;
-    }
-
-    public void setProxyPort(String port) {
-        this.proxyPort = port;
-        if (isProxy()) {
-            System.setProperty("http.proxyPort", port);
-        }
-    }
-}
+   }

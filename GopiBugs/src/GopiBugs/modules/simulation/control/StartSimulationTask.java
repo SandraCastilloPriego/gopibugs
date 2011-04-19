@@ -21,7 +21,9 @@ import GopiBugs.data.BugDataset;
 import GopiBugs.data.DatasetType;
 import GopiBugs.data.PeakListRow;
 import GopiBugs.data.impl.SimpleParameterSet;
+import GopiBugs.desktop.impl.DesktopParameters;
 import GopiBugs.main.GopiBugsCore;
+import GopiBugs.modules.configuration.ConfigurationParameters;
 import GopiBugs.modules.simulation.Bug;
 import GopiBugs.modules.simulation.CanvasWorld;
 import GopiBugs.modules.simulation.Result;
@@ -62,6 +64,7 @@ public class StartSimulationTask {
         private int totalIDs, stoppingCriteria, stopCounting = 0;
         private double minCountId = 100;
         private List<Result> results;
+        private boolean showResults, showCanvas;
 
         public StartSimulationTask(BugDataset[] datasets, SimpleParameterSet parameters) {
                 for (BugDataset dataset : datasets) {
@@ -78,6 +81,12 @@ public class StartSimulationTask {
                 this.iterations = (Integer) parameters.getParameterValue(StartSimulationParameters.iterations);
                 this.maxBugs = (Integer) parameters.getParameterValue(StartSimulationParameters.bugLimit);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
+
+                DesktopParameters desktopParameters = (DesktopParameters) GopiBugsCore.getDesktop().getParameterSet();
+                ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
+                this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
+                this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
+
 
                 this.ranges = new ArrayList<Range>();
                 this.results = new ArrayList<Result>();
@@ -145,6 +154,12 @@ public class StartSimulationTask {
         }
 
         private void startCicle(Range range, List<Bug> bugs, List<Result> results) {
+                DesktopParameters desktopParameters = (DesktopParameters) GopiBugsCore.getDesktop().getParameterSet();
+                ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
+                
+                this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
+                this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
+
                 world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs);
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
@@ -184,17 +199,21 @@ public class StartSimulationTask {
         public class sinkThread extends Thread {
 
                 @Override
-                public void run() {                       
+                public void run() {
                         for (int i = 0; i < iterations; i++) {
-                                // Paints the graphics
-                                canvas.update(canvas.getGraphics());
+                                if (showCanvas) {
+                                        // Paints the graphics
+                                        canvas.update(canvas.getGraphics());
+                                }
                                 world.cicle();
-                        }                  
-                     
+                        }
+
                         int index = rand.nextInt(ranges.size() - 1);
                         Range range = ranges.get(index);
-                        printResult(world.getBugs(), range);
-                      
+                        if (showResults) {
+                                printResult(world.getBugs(), range);
+                        }
+
                         /* If the number of different variable combination doesn't change, the
                         simulation will stop after 15 cicles.
                          */
@@ -206,11 +225,13 @@ public class StartSimulationTask {
                         } else {
                                 stopCounting++;
                         }
-                        
+
                         // Checking the stopping criteria
                         if (result >= stoppingCriteria || stopCounting < 15) {
                                 startCicle(range, world.getBugs(), world.getResult());
-                        }                       
+                        } else {
+                                printResult(world.getBugs(), range);
+                        }
                 }
         }
 
