@@ -227,10 +227,10 @@ public class StartSimulationTask {
                         }
 
                         // Checking the stopping criteria
-                        if (result >= stoppingCriteria || stopCounting < 15) {
-                                startCicle(range, world.getBugs(), world.getResult());
+                        if (result <= stoppingCriteria || stopCounting > 15) {
+                                  printResult(world.getBugs(), range);
                         } else {
-                                printResult(world.getBugs(), range);
+                                startCicle(range, world.getBugs(), world.getResult());
                         }
                 }
         }
