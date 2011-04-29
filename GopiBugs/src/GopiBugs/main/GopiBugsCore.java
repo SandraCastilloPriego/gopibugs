@@ -24,8 +24,6 @@ import GopiBugs.desktop.Desktop;
 import GopiBugs.desktop.impl.MainWindow;
 import GopiBugs.desktop.impl.helpsystem.HelpImpl;
 import GopiBugs.taskcontrol.TaskController;
-import GopiBugs.util.NumberFormatter;
-import GopiBugs.util.NumberFormatter.FormatterType;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.logging.Level;
@@ -262,23 +260,5 @@ public abstract class GopiBugsCore {
     public static void setDesktop(MainWindow mainWindow) {
         desktop = mainWindow;
     }
-
-    // Number formatting functions
-    public static NumberFormatter getIntensityFormat() {
-        return preferences.getIntensityFormat();
-    }
-
-    public static NumberFormatter getMZFormat() {
-        if (preferences == null || preferences.getMZFormat() == null) {
-            return new NumberFormatter(FormatterType.NUMBER, "0.000");
-        }
-        return preferences.getMZFormat();
-    }
-
-    public static NumberFormatter getRTFormat() {
-        if (preferences == null || preferences.getRTFormat() == null) {
-            return new NumberFormatter(FormatterType.TIME, "m:ss");
-        }
-        return preferences.getRTFormat();
-    }
+    
 }

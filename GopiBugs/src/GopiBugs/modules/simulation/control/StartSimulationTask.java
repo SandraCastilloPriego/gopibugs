@@ -227,7 +227,7 @@ public class StartSimulationTask {
                         }
 
                         // Checking the stopping criteria
-                        if (result <= stoppingCriteria || stopCounting > 15) {
+                        if (result <= stoppingCriteria || stopCounting > 25000) {
                                   printResult(world.getBugs(), range);
                         } else {
                                 startCicle(range, world.getBugs(), world.getResult());
