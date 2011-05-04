@@ -93,6 +93,7 @@ public class Bug {
                         this.rowList.add(row);
                 }
                 this.classifierType = classifiersEnum.RandomForest;
+                this.MAXNUMBERGENES = dataset.getNumberRows();
               //  int n = rand.nextInt(classifiersEnum.values().length);
               //  this.classifierType = classifiersEnum.values()[n];
                 // if (rand.nextInt(1) == 0) {
@@ -419,5 +420,9 @@ public class Bug {
                         return null;
                 }
 
+        }
+
+        void setCount(int count) {
+                this.MAXNUMBERGENES = count;
         }
 }

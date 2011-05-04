@@ -144,7 +144,7 @@ public class StartSimulationTask {
                         Range range = ranges.get(index);
 
                         // Starts the simulation (first cicle with the selected range of samples)
-                        this.startCicle(range, null, null);
+                        this.startCicle(range, null, null, this.training.getNumberRows());
 
                         status = TaskStatus.FINISHED;
                 } catch (Exception e) {
@@ -153,14 +153,14 @@ public class StartSimulationTask {
                 }
         }
 
-        private void startCicle(Range range, List<Bug> bugs, List<Result> results) {
+        private void startCicle(Range range, List<Bug> bugs, List<Result> results, int count) {
                 DesktopParameters desktopParameters = (DesktopParameters) GopiBugsCore.getDesktop().getParameterSet();
                 ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
                 
                 this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
                 this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
 
-                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs);
+                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, count);
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
                 canvasPanel.add(canvas);
@@ -179,7 +179,7 @@ public class StartSimulationTask {
 
         }
 
-        private double countIDs() {
+        private int countIDs() {
                 int count = 0;
                 List<Integer> alreadyCount = new ArrayList<Integer>();
                 for (Bug bug : world.getBugs()) {
@@ -193,7 +193,7 @@ public class StartSimulationTask {
                 }
                 double result = ((double) ((double) count / (double) this.totalIDs)) * 100;
                 System.out.println("Count : " + count + "/" + this.totalIDs + " result: " + result + "%");
-                return result;
+                return count;
         }
 
         public class sinkThread extends Thread {
@@ -218,7 +218,8 @@ public class StartSimulationTask {
                         simulation will stop after 15 cicles.
                          */
                         // Counting the number of variables in the world
-                        double result = countIDs();
+                        int count = countIDs();
+                        double result = ((double) ((double) count / (double) training.getNumberRows())) * 100;
                         if (result < minCountId) {
                                 minCountId = result;
                                 stopCounting = 0;
@@ -226,11 +227,12 @@ public class StartSimulationTask {
                                 stopCounting++;
                         }
 
+
                         // Checking the stopping criteria
                         if (result <= stoppingCriteria || stopCounting > 25000) {
                                   printResult(world.getBugs(), range);
                         } else {
-                                startCicle(range, world.getBugs(), world.getResult());
+                                startCicle(range, world.getBugs(), world.getResult(), count);
                         }
                 }
         }
