@@ -86,7 +86,8 @@ public class Cell {
                 Bug mother = bugsInside.get(0);
                 for (Bug father : this.bugsInside) {
                     if (mother != father && father.isClassify() && mother.isClassify() && mother.getSpecSenAverage() > 0.55 && father.getSpecSenAverage() > 0.55 && mother.getAge() > 100 && father.getAge() > 100) {
-                        childs.add(new Bug(mother, father, mother.getDataset(), bugLife));
+                            mother.addLife();
+                            childs.add(new Bug(mother, father, mother.getDataset(), bugLife));
                     }
                 }
             }

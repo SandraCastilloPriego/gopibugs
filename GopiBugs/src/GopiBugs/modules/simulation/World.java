@@ -94,12 +94,12 @@ public class World {
                 }
 
 
-                for(int i = 0; i < 10; i++){
+               /* for(int i = 0; i < 10; i++){
                         Bug bug = this.population.get(i);
                         for(PeakListRow row :bug.getRows()){
                                this.addBug(row);
                         }
-                }
+                }*/
         }
 
         private void setSamplesInCell(Vector<String> samplesNames, Cell cell, Range range) {

@@ -137,6 +137,7 @@ public class Bug {
                 }
                 this.classify(cell.getRange());
                 this.life = bugLife;
+                this.MAXNUMBERGENES = dataset.getNumberRows();
         }
 
         private void assingGenes(Bug parent, int plus) {
@@ -266,6 +267,10 @@ public class Bug {
 
         public void kill() {
                 this.life = -1;
+        }
+
+        public void addLife(){
+                this.life++;
         }
 
         public boolean isClassify() {
