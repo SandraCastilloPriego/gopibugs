@@ -5,32 +5,19 @@
   <modules> 
     <module class="GopiBugs.modules.file.openBasicFiles.training.OpenBasicFile"/>  
     <module class="GopiBugs.modules.file.openBasicFiles.validation.OpenBasicFile"/>  
-<<<<<<< .mine
     <module class="GopiBugs.modules.exit.ExitProgram"/>  
     <module class="GopiBugs.modules.configuration.Configuration"> 
-=======
-    <module class="GopiBugs.modules.configuration.Configuration"> 
->>>>>>> .r22
       <parameters>
-<<<<<<< .mine
         <parameter name="Write results" type="BOOLEAN">true</parameter>
         <parameter name="Paint simulation" type="BOOLEAN">true</parameter>
-=======
-        <parameter name="Write results" type="BOOLEAN">false</parameter>
-        <parameter name="Paint simulation" type="BOOLEAN">false</parameter>
->>>>>>> .r22
       </parameters> 
     </module>  
-<<<<<<< .mine
     <module class="GopiBugs.modules.simulation.test.Test"> 
       <parameters>
         <parameter name="Classifier" type="STRING">RandomForest</parameter>
         <parameter name="IDs:" type="STRING">4,67,84</parameter>
       </parameters> 
     </module>  
-=======
-    <module class="GopiBugs.modules.exit.ExitProgram"/>  
->>>>>>> .r22
     <module class="GopiBugs.modules.simulation.control.StartSimulation"> 
       <parameters>
         <parameter name="Number of iterations" type="INTEGER">50</parameter>
@@ -47,22 +34,13 @@
   </modules>  
   <desktop>
     <mainwindow>
-<<<<<<< .mine
-      <x>0</x>
+      <x>-4</x>
       <y>27</y>
-=======
-      <x>340</x>
-      <y>25</y>
->>>>>>> .r22
-      <width>990</width>
+      <width>-1</width>
       <height>-1</height>
     </mainwindow>
     <lastdirectory></lastdirectory>
-<<<<<<< .mine
     <lastProjectDirectory>/home/scsandra/Desktop/diabetes/Dataset_LipidomicsT1D.csv</lastProjectDirectory>
-=======
-    <lastProjectDirectory>/home/bicha/Downloads/Dataset_GCGCTOF_AA1AA2CTR.csv</lastProjectDirectory>
->>>>>>> .r22
     <lastSaveDirectory>/</lastSaveDirectory>
     <parameter name="Filename" type="FILE_NAME"/>
     <parameter name="type" type="STRING"/>
