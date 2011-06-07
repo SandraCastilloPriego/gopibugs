@@ -21,29 +21,39 @@ import GopiBugs.data.Parameter;
 import GopiBugs.data.ParameterType;
 import GopiBugs.data.impl.SimpleParameter;
 import GopiBugs.data.impl.SimpleParameterSet;
+import GopiBugs.modules.simulation.classifiersEnum;
 
 public class StartSimulationParameters extends SimpleParameterSet {
 
-    public static final Parameter iterations = new SimpleParameter(
-            ParameterType.INTEGER, "Number of iterations",
-            "Introduce the number of iterations", new Integer(1000));
-    public static final Parameter worldSize = new SimpleParameter(
-            ParameterType.INTEGER, "Size of the world",
-            "Introduce the size of each side of the world", new Integer(100));
-    public static final Parameter bugLimit = new SimpleParameter(
-            ParameterType.INTEGER, "Max number of bugs",
-            "Maximum number of bugs living in the world", new Integer(1500));
-    public static final Parameter numberOfBugs = new SimpleParameter(
-            ParameterType.INTEGER, "Number of copies of bugs",
-            "Introduce the number of copies of variables", new Integer(3));
-    public static final Parameter bugLife = new SimpleParameter(
-            ParameterType.INTEGER, "Life of the Bugs",
-            "Minimum number of cicles that a bug can live", new Integer(300));
-    public static final Parameter stoppingCriteria = new SimpleParameter(
-            ParameterType.INTEGER, "Stopping criteria (%)",
-            "% of variables in living in the world", new Integer(30));
-    
-    public StartSimulationParameters() {
-        super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, stoppingCriteria});
-    }
+        public static final Parameter iterations = new SimpleParameter(
+                ParameterType.INTEGER, "Number of iterations",
+                "Introduce the number of iterations", new Integer(1000));
+        public static final Parameter worldSize = new SimpleParameter(
+                ParameterType.INTEGER, "Size of the world",
+                "Introduce the size of each side of the world", new Integer(100));
+        public static final Parameter bugLimit = new SimpleParameter(
+                ParameterType.INTEGER, "Max number of bugs",
+                "Maximum number of bugs living in the world", new Integer(1500));
+        public static final Parameter numberOfBugs = new SimpleParameter(
+                ParameterType.INTEGER, "Number of copies of bugs",
+                "Introduce the number of copies of variables", new Integer(3));
+        public static final Parameter bugLife = new SimpleParameter(
+                ParameterType.INTEGER, "Life of the Bugs",
+                "Minimum number of cicles that a bug can live", new Integer(300));
+        public static final Parameter repThreshold = new SimpleParameter(
+                ParameterType.DOUBLE, "Reproduction threshold",
+                "This value represents the minimun average of specificity and sensibility needed for a bug to reproduce. ", new Double(0.55));
+        public static final Parameter bugChromosomes = new SimpleParameter(
+                ParameterType.INTEGER, "Max mumber of variables",
+                "Maximum mumber of variables for each bug", new Integer(3));
+        public static final Parameter classifier = new SimpleParameter(
+                ParameterType.STRING, "Classifier",
+                "Select the classifier", null, classifiersEnum.values());
+        public static final Parameter stoppingCriteria = new SimpleParameter(
+                ParameterType.INTEGER, "Stopping criteria (%)",
+                "% of variables in living in the world", new Integer(30));
+
+        public StartSimulationParameters() {
+                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, repThreshold, bugChromosomes, classifier, stoppingCriteria});
+        }
 }

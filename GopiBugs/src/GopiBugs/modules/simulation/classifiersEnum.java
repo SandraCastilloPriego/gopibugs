@@ -10,7 +10,7 @@ package GopiBugs.modules.simulation;
  * @author scsandra
  */
 public enum classifiersEnum {
-    Logistic, LogisticBase, LogitBoost, 
+    Automatic_Selection, Logistic, LogisticBase, LogitBoost,
     NaiveBayesMultinomialUpdateable, NaiveBayesUpdateable,
     RandomForest, RandomCommittee, RandomTree,
     ZeroR, Stacking, AdaBoostM1, Bagging,

@@ -32,13 +32,17 @@ public class Cell {
     String type;
     String sampleName;
     List<Bug> bugsInside;
-    int bugLife;
+    int bugLife, maxVariable;
+    double repThreshold;
     Random rand;
     Range range;
 
-    public Cell(int bugLife) {
+    public Cell(int bugLife, double repThreshold, int maxVariable) {
         this.rand = new Random();
+        this.maxVariable = maxVariable;
+        this.repThreshold = repThreshold;
         this.bugLife = bugLife;
+
     }
 
     public void setParameters(String sampleName, Range range, String type) {
@@ -85,9 +89,9 @@ public class Cell {
                 Collections.sort(bugsInside, c);
                 Bug mother = bugsInside.get(0);
                 for (Bug father : this.bugsInside) {
-                    if (mother != father && father.isClassify() && mother.isClassify() && mother.getSpecSenAverage() > 0.55 && father.getSpecSenAverage() > 0.55 && mother.getAge() > 100 && father.getAge() > 100) {
+                    if (mother != father && father.isClassify() && mother.isClassify() && mother.getSpecSenAverage() > this.repThreshold && father.getSpecSenAverage() > this.repThreshold && mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
                             mother.addLife();
-                            childs.add(new Bug(mother, father, mother.getDataset(), bugLife));
+                            childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
                     }
                 }
             }

@@ -20,6 +20,7 @@ import GopiBugs.data.BugDataset;
 import GopiBugs.data.PeakListRow;
 import GopiBugs.util.Range;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -76,12 +77,12 @@ public class Bug {
         private double specificity = 0;
         double spec = 0, sen = 0, totalspec = 0, totalsen = 0;
         private Random rand;
-        private int MAXNUMBERGENES = 3;
+        private int MAXNUMBERGENES;
         Evaluation eval;
         boolean fixValue = false;
         Range range;
 
-        public Bug(int x, int y, Cell cell, PeakListRow row, BugDataset dataset, int bugLife) {
+        public Bug(int x, int y, Cell cell, PeakListRow row, BugDataset dataset, int bugLife, int maxVariable, classifiersEnum classifier) {
                 rand = new Random();
                 this.cell = cell;
                 this.range = cell.getRange();
@@ -92,22 +93,20 @@ public class Bug {
                 if (row != null) {
                         this.rowList.add(row);
                 }
-                this.classifierType = classifiersEnum.RandomForest;
-                this.MAXNUMBERGENES = dataset.getNumberRows();
-              //  int n = rand.nextInt(classifiersEnum.values().length);
-              //  this.classifierType = classifiersEnum.values()[n];
-                // if (rand.nextInt(1) == 0) {
-                // this.classifierType = classifiersEnum.Logistic;
-                /*  } else {
-                 
-                }*/
+                this.MAXNUMBERGENES = maxVariable;
+                if (classifier == classifiersEnum.Automatic_Selection) {
+                        int n = rand.nextInt(classifiersEnum.values().length);
+                        this.classifierType = classifiersEnum.values()[n];
+                } else {
+                        this.classifierType = classifier;
+                }
                 this.classify(cell.getRange());
                 this.life = bugLife;
         }
 
         @Override
         public Bug clone() {
-                Bug newBug = new Bug(this.x, this.y, this.cell, null, this.dataset, this.life);                        
+                Bug newBug = new Bug(this.x, this.y, this.cell, null, this.dataset, this.life, this.MAXNUMBERGENES, this.classifierType);
                 newBug.rowList = this.getRows();
                 return newBug;
         }
@@ -116,7 +115,7 @@ public class Bug {
                 return this.total;
         }
 
-        public Bug(Bug father, Bug mother, BugDataset dataset, int bugLife) {
+        public Bug(Bug father, Bug mother, BugDataset dataset, int bugLife, int maxVariable) {
                 rand = new Random();
                 this.dataset = dataset;
                 this.cell = father.getCell();
@@ -124,9 +123,9 @@ public class Bug {
                 this.x = father.getx();
                 this.y = father.gety();
                 this.rowList = new ArrayList<PeakListRow>();
-
-                this.assingGenes(mother, 0);
-                this.assingGenes(father, 0);
+                this.MAXNUMBERGENES = maxVariable;
+                this.assingGenes(mother, false);
+                this.assingGenes(father, true);
 
                 this.orderPurgeGenes();
 
@@ -137,26 +136,29 @@ public class Bug {
                 }
                 this.classify(cell.getRange());
                 this.life = bugLife;
-                this.MAXNUMBERGENES = dataset.getNumberRows();
+
         }
 
-        private void assingGenes(Bug parent, int plus) {
+        private void assingGenes(Bug parent, boolean isFather) {
                 for (PeakListRow row : parent.getRows()) {
                         if (!this.rowList.contains(row)) {
                                 this.rowList.add(row);
+                                if (isFather) {
+                                        break;
+                                }
                         }
                 }
         }
 
         private void orderPurgeGenes() {
                 int removeGenes = this.rowList.size() - this.MAXNUMBERGENES;
-                if (removeGenes > 0) {                       
-                        for (int i = 0; i < removeGenes ; i++) {
+                if (removeGenes > 0) {
+                        for (int i = 0; i < removeGenes; i++) {
                                 int index = rand.nextInt(this.rowList.size() - 1);
                                 this.rowList.remove(index);
                         }
                 }
-        }       
+        }
 
         public classifiersEnum getClassifierType() {
                 return this.classifierType;
@@ -269,7 +271,7 @@ public class Bug {
                 this.life = -1;
         }
 
-        public void addLife(){
+        public void addLife() {
                 this.life++;
         }
 
@@ -305,7 +307,8 @@ public class Bug {
                                 return false;
                         }
                 } catch (Exception ex) {
-                        Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
+                        this.kill();
+                        //Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return false;
         }
@@ -425,9 +428,5 @@ public class Bug {
                         return null;
                 }
 
-        }
-
-        void setCount(int count) {
-                this.MAXNUMBERGENES = count;
-        }
+        }        
 }

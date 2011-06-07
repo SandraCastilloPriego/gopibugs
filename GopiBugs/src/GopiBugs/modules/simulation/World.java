@@ -42,14 +42,16 @@ public class World {
         int jump = 1;
         int cicleNumber = 0;
         int bugLife;
+        int maxVariables;
         JTextArea text;
         List<Result> results;
         int printCount = 0;
         int bugsLimitNumber;
+        classifiersEnum classifier;
 
         public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
                 List<Bug> bugs, int numberOfBugsCopies, int bugLife, JTextArea text,
-                List<Result> results, int bugsLimitNumber, int count) {
+                List<Result> results, int bugsLimitNumber, double repThreshold, int maxVariables, classifiersEnum classifier) {
                 this.training = training;
                 this.validation = validation;
                 this.cellsPerSide = cellsPerSide;
@@ -57,9 +59,10 @@ public class World {
                 this.population = new ArrayList<Bug>();
                 this.rand = new Random();
                 this.bugLife = bugLife;
+                this.maxVariables = maxVariables;
                 this.text = text;
                 this.bugsLimitNumber = bugsLimitNumber;
-
+                this.classifier = classifier;
 
 
                 if (results == null) {
@@ -73,7 +76,7 @@ public class World {
                         for (int i = 0; i < cellsPerSide; i++) {
                                 cells[i] = new Cell[cellsPerSide];
                                 for (int j = 0; j < cells[i].length; j++) {
-                                        cells[i][j] = new Cell(bugLife);
+                                        cells[i][j] = new Cell(bugLife, repThreshold, maxVariables);
                                         this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
                                 }
                         }
@@ -88,17 +91,16 @@ public class World {
                                 this.population = bugs;
                                 for (Bug bug : this.population) {
                                         bug.classify(range);
-                                        bug.setCount(count);
                                 }
                         }
                 }
 
 
-               /* for(int i = 0; i < 10; i++){
-                        Bug bug = this.population.get(i);
-                        for(PeakListRow row :bug.getRows()){
-                               this.addBug(row);
-                        }
+                /* for(int i = 0; i < 10; i++){
+                Bug bug = this.population.get(i);
+                for(PeakListRow row :bug.getRows()){
+                this.addBug(row);
+                }
                 }*/
         }
 
@@ -124,7 +126,7 @@ public class World {
                 while (isInside) {
                         int X = this.rand.nextInt(this.cellsPerSide - 1);
                         int Y = this.rand.nextInt(this.cellsPerSide - 1);
-                        Bug bug = new Bug(X, Y, cells[X][Y], row, training, bugLife);
+                        Bug bug = new Bug(X, Y, cells[X][Y], row, training, bugLife, maxVariables, classifier);
                         cells[X][Y].addBug(bug);
                         this.population.add(bug);
                         isInside = false;

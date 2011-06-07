@@ -29,6 +29,7 @@ import GopiBugs.modules.simulation.CanvasWorld;
 import GopiBugs.modules.simulation.Result;
 import GopiBugs.modules.simulation.TestBug;
 import GopiBugs.modules.simulation.World;
+import GopiBugs.modules.simulation.classifiersEnum;
 import GopiBugs.taskcontrol.TaskStatus;
 import GopiBugs.util.Range;
 import java.awt.Dimension;
@@ -57,7 +58,9 @@ public class StartSimulationTask {
         private JPanel canvasPanel;
         private World world;
         private JInternalFrame frame;
-        private int numberOfBugsCopies, worldSize, bugLife, iterations, maxBugs = 1000;
+        private int numberOfBugsCopies, worldSize, bugLife, iterations, maxBugs = 1000, maxVariables;
+        private double repThreshold;
+        private classifiersEnum classifier = classifiersEnum.Automatic_Selection;
         private JTextArea textArea;
         private List<Range> ranges;
         private Random rand;
@@ -81,6 +84,13 @@ public class StartSimulationTask {
                 this.iterations = (Integer) parameters.getParameterValue(StartSimulationParameters.iterations);
                 this.maxBugs = (Integer) parameters.getParameterValue(StartSimulationParameters.bugLimit);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
+                this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
+                this.repThreshold = (Double) parameters.getParameterValue(StartSimulationParameters.repThreshold);
+
+                this.maxVariables = (Integer) parameters.getParameterValue(StartSimulationParameters.bugChromosomes);
+                this.classifier = (classifiersEnum) parameters.getParameterValue(StartSimulationParameters.classifier);
+
+
 
                 DesktopParameters desktopParameters = (DesktopParameters) GopiBugsCore.getDesktop().getParameterSet();
                 ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
@@ -144,7 +154,7 @@ public class StartSimulationTask {
                         Range range = ranges.get(index);
 
                         // Starts the simulation (first cicle with the selected range of samples)
-                        this.startCicle(range, null, null, this.training.getNumberRows());
+                        this.startCicle(range, null, null);
 
                         status = TaskStatus.FINISHED;
                 } catch (Exception e) {
@@ -153,14 +163,14 @@ public class StartSimulationTask {
                 }
         }
 
-        private void startCicle(Range range, List<Bug> bugs, List<Result> results, int count) {
+        private void startCicle(Range range, List<Bug> bugs, List<Result> results) {
                 DesktopParameters desktopParameters = (DesktopParameters) GopiBugsCore.getDesktop().getParameterSet();
                 ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
-                
+
                 this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
                 this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
 
-                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, count);
+                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, this.repThreshold, this.maxVariables, this.classifier);
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
                 canvasPanel.add(canvas);
@@ -230,9 +240,9 @@ public class StartSimulationTask {
 
                         // Checking the stopping criteria
                         if (result <= stoppingCriteria || stopCounting > 25000) {
-                                  printResult(world.getBugs(), range);
+                                printResult(world.getBugs(), range);
                         } else {
-                                startCicle(range, world.getBugs(), world.getResult(), count);
+                                startCicle(range, world.getBugs(), world.getResult());
                         }
                 }
         }
@@ -251,7 +261,7 @@ public class StartSimulationTask {
                 };
 
                 for (Bug bug : bugs) {
-                        if (bug.getAge() > (this.bugLife / 3) * 2 && bug.getSpecSenAverage() > 0.5) {
+                        if (bug.getAge() > ((this.bugLife / 3) * 2) && bug.getSpecSenAverage() > this.repThreshold) {
                                 Result result = new Result();
                                 result.Classifier = bug.getClassifierType().name();
                                 List<Integer> ids = new ArrayList<Integer>();
@@ -293,7 +303,7 @@ public class StartSimulationTask {
                 for (Result r : results) {
                         result += r.toString();
                         contbug++;
-                        if (contbug > 10) {
+                        if (contbug > 500) {
                                 break;
                         }
                 }
