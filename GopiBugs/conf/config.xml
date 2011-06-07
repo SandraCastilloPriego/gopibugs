@@ -5,33 +5,64 @@
   <modules> 
     <module class="GopiBugs.modules.file.openBasicFiles.training.OpenBasicFile"/>  
     <module class="GopiBugs.modules.file.openBasicFiles.validation.OpenBasicFile"/>  
+<<<<<<< .mine
+    <module class="GopiBugs.modules.exit.ExitProgram"/>  
     <module class="GopiBugs.modules.configuration.Configuration"> 
+=======
+    <module class="GopiBugs.modules.configuration.Configuration"> 
+>>>>>>> .r22
       <parameters>
+<<<<<<< .mine
+        <parameter name="Write results" type="BOOLEAN">true</parameter>
+        <parameter name="Paint simulation" type="BOOLEAN">true</parameter>
+=======
         <parameter name="Write results" type="BOOLEAN">false</parameter>
         <parameter name="Paint simulation" type="BOOLEAN">false</parameter>
+>>>>>>> .r22
       </parameters> 
     </module>  
+<<<<<<< .mine
+    <module class="GopiBugs.modules.simulation.test.Test"> 
+      <parameters>
+        <parameter name="Classifier" type="STRING">RandomForest</parameter>
+        <parameter name="IDs:" type="STRING">4,67,84</parameter>
+      </parameters> 
+    </module>  
+=======
     <module class="GopiBugs.modules.exit.ExitProgram"/>  
+>>>>>>> .r22
     <module class="GopiBugs.modules.simulation.control.StartSimulation"> 
       <parameters>
         <parameter name="Number of iterations" type="INTEGER">50</parameter>
-        <parameter name="Size of the world" type="INTEGER">50</parameter>
+        <parameter name="Size of the world" type="INTEGER">25</parameter>
         <parameter name="Max number of bugs" type="INTEGER">1500</parameter>
-        <parameter name="Number of copies of bugs" type="INTEGER">3</parameter>
-        <parameter name="Life of the Bugs" type="INTEGER">500</parameter>
-        <parameter name="Stopping criteria (%)" type="INTEGER">20</parameter>
+        <parameter name="Number of copies of bugs" type="INTEGER">5</parameter>
+        <parameter name="Life of the Bugs" type="INTEGER">300</parameter>
+        <parameter name="Reproduction threshold" type="DOUBLE">0.5</parameter>
+        <parameter name="Max mumber of variables" type="INTEGER">3</parameter>
+        <parameter name="Classifier" type="STRING">Automatic_Selection</parameter>
+        <parameter name="Stopping criteria (%)" type="INTEGER">0</parameter>
       </parameters> 
     </module> 
   </modules>  
   <desktop>
     <mainwindow>
+<<<<<<< .mine
+      <x>0</x>
+      <y>27</y>
+=======
       <x>340</x>
       <y>25</y>
+>>>>>>> .r22
       <width>990</width>
       <height>-1</height>
     </mainwindow>
     <lastdirectory></lastdirectory>
+<<<<<<< .mine
+    <lastProjectDirectory>/home/scsandra/Desktop/diabetes/Dataset_LipidomicsT1D.csv</lastProjectDirectory>
+=======
     <lastProjectDirectory>/home/bicha/Downloads/Dataset_GCGCTOF_AA1AA2CTR.csv</lastProjectDirectory>
+>>>>>>> .r22
     <lastSaveDirectory>/</lastSaveDirectory>
     <parameter name="Filename" type="FILE_NAME"/>
     <parameter name="type" type="STRING"/>
