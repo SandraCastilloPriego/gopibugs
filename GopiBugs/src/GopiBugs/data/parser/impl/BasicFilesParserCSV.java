@@ -79,7 +79,7 @@ public class BasicFilesParserCSV implements Parser {
                         String[] types = reader.getValues();
 
                         // Set types
-                        for (int i = 1; i < types.length; i++) {
+                        for (int i = 2; i < types.length; i++) {
                                 this.dataset.setSampleType(header[i], types[i]);
                         }
 
@@ -108,8 +108,7 @@ public class BasicFilesParserCSV implements Parser {
                                 try {
                                         if (i == 0) {
                                                 lipid.setID(Integer.parseInt(sdata[i]));
-                                        }
-                                        if (i == 1) {
+                                        }else if (i == 1) {
                                                 lipid.setCluster(Integer.parseInt(sdata[i]));
                                         } else {
                                                 double value = 0.0;
@@ -140,7 +139,7 @@ public class BasicFilesParserCSV implements Parser {
 
         private void setExperimentsName(String[] header) {
                 try {
-                        for (int i = 1; i < header.length; i++) {
+                        for (int i = 2; i < header.length; i++) {
                                 this.dataset.addColumnName(header[i]);
                         }
                 } catch (Exception exception) {
