@@ -20,7 +20,6 @@ import GopiBugs.data.BugDataset;
 import GopiBugs.data.PeakListRow;
 import GopiBugs.util.Range;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -81,6 +80,7 @@ public class Bug {
         Evaluation eval;
         boolean fixValue = false;
         Range range;
+        int[] clusters;
 
         public Bug(int x, int y, Cell cell, PeakListRow row, BugDataset dataset, int bugLife, int maxVariable, classifiersEnum classifier) {
                 rand = new Random();
@@ -102,6 +102,11 @@ public class Bug {
                 }
                 this.classify(cell.getRange());
                 this.life = bugLife;
+
+                clusters = new int[rowList.size()];
+                for (int i = 0; i < rowList.size(); i++) {
+                        clusters[i] = rowList.get(i).getCluster();
+                }
         }
 
         @Override
@@ -137,6 +142,11 @@ public class Bug {
                 this.classify(cell.getRange());
                 this.life = bugLife;
 
+                clusters = new int[rowList.size()];
+                for (int i = 0; i < rowList.size(); i++) {
+                        clusters[i] = rowList.get(i).getCluster();
+                }
+
         }
 
         private void assingGenes(Bug parent, boolean isFather) {
@@ -150,14 +160,29 @@ public class Bug {
                 }
         }
 
-        private void orderPurgeGenes() {
+        public void orderPurgeGenes() {
                 int removeGenes = this.rowList.size() - this.MAXNUMBERGENES;
                 if (removeGenes > 0) {
                         for (int i = 0; i < removeGenes; i++) {
-                                int index = rand.nextInt(this.rowList.size() - 1);
+                                int index = getRepeatIndex();
+                                if (index == -1) {
+                                        index = rand.nextInt(this.rowList.size() - 1);
+                                }
                                 this.rowList.remove(index);
                         }
                 }
+        }
+
+        public int getRepeatIndex() {
+                for (int i = 0; i < this.rowList.size(); i++) {
+                        PeakListRow row = this.rowList.get(i);
+                        for (PeakListRow r : this.rowList) {
+                                if (row != r && row.getCluster() == r.getCluster()) {
+                                        return i;
+                                }
+                        }
+                }
+                return -1;
         }
 
         public classifiersEnum getClassifierType() {
@@ -428,5 +453,5 @@ public class Bug {
                         return null;
                 }
 
-        }        
+        }
 }

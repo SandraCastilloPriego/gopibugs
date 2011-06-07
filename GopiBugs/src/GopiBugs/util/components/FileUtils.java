@@ -22,8 +22,6 @@ import GopiBugs.data.PeakListRow;
 import GopiBugs.data.datamodels.OtherDataModel;
 import GopiBugs.data.DatasetType;
 import GopiBugs.data.impl.datasets.SimpleBasicDataset;
-import GopiBugs.data.impl.peaklists.SimplePeakListRowGCGC;
-import GopiBugs.data.impl.peaklists.SimplePeakListRowLCMS;
 import GopiBugs.data.impl.peaklists.SimplePeakListRowOther;
 import GopiBugs.util.Tables.DataTableModel;
 
@@ -34,11 +32,7 @@ import GopiBugs.util.Tables.DataTableModel;
 public class FileUtils {
 
     public static PeakListRow getPeakListRow(DatasetType type) {
-        switch (type) {
-            case LCMS:
-                return new SimplePeakListRowLCMS();
-            case GCGCTOF:
-                return new SimplePeakListRowGCGC();
+        switch (type) {           
             case TRAINING:
             case VALIDATION:
                 return new SimplePeakListRowOther();
