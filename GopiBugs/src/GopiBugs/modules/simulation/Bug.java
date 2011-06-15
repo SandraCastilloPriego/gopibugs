@@ -130,7 +130,7 @@ public class Bug {
                 this.rowList = new ArrayList<PeakListRow>();
                 this.MAXNUMBERGENES = maxVariable;
                 this.assingGenes(mother, false);
-                this.assingGenes(father, true);
+                this.assingGenes(father, false);
 
                 this.orderPurgeGenes();
 
