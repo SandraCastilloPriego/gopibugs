@@ -3,22 +3,22 @@
 <configuration> 
   <nodes local="2"/>  
   <modules> 
-    <module class="GopiBugs.modules.file.openBasicFiles.training.OpenBasicFile"/>  
-    <module class="GopiBugs.modules.file.openBasicFiles.validation.OpenBasicFile"/>  
-    <module class="GopiBugs.modules.exit.ExitProgram"/>  
-    <module class="GopiBugs.modules.configuration.Configuration"> 
+    <module class="alvs.modules.file.openBasicFiles.training.OpenBasicFile"/>  
+    <module class="alvs.modules.file.openBasicFiles.validation.OpenBasicFile"/>  
+    <module class="alvs.modules.exit.ExitProgram"/>  
+    <module class="alvs.modules.configuration.Configuration"> 
       <parameters>
         <parameter name="Write results" type="BOOLEAN">true</parameter>
         <parameter name="Paint simulation" type="BOOLEAN">true</parameter>
       </parameters> 
     </module>  
-    <module class="GopiBugs.modules.simulation.test.Test"> 
+    <module class="alvs.modules.simulation.test.Test"> 
       <parameters>
-        <parameter name="Classifier" type="STRING">RandomForest</parameter>
+        <parameter name="Classifier" type="STRING">RandomTree</parameter>
         <parameter name="IDs:" type="STRING">4,67,84</parameter>
       </parameters> 
     </module>  
-    <module class="GopiBugs.modules.simulation.control.StartSimulation"> 
+    <module class="alvs.modules.simulation.control.StartSimulation"> 
       <parameters>
         <parameter name="Number of iterations" type="INTEGER">50</parameter>
         <parameter name="Size of the world" type="INTEGER">25</parameter>
@@ -34,13 +34,13 @@
   </modules>  
   <desktop>
     <mainwindow>
-      <x>-4</x>
+      <x>0</x>
       <y>27</y>
       <width>-1</width>
       <height>-1</height>
     </mainwindow>
     <lastdirectory></lastdirectory>
-    <lastProjectDirectory>/home/scsandra/Desktop/diabetes/Dataset_LipidomicsT1D.csv</lastProjectDirectory>
+    <lastProjectDirectory>/home/scsandra/Desktop/diabetes/Dataset_LipidomicsAA3CTR.csv</lastProjectDirectory>
     <lastSaveDirectory>/</lastSaveDirectory>
     <parameter name="Filename" type="FILE_NAME"/>
     <parameter name="type" type="STRING"/>
