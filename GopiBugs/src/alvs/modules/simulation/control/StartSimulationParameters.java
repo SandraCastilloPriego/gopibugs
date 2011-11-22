@@ -40,10 +40,7 @@ public class StartSimulationParameters extends SimpleParameterSet {
         public static final Parameter bugLife = new SimpleParameter(
                 ParameterType.INTEGER, "Life of the Bugs",
                 "Minimum number of cicles that a bug can live", new Integer(300));
-        public static final Parameter repThreshold = new SimpleParameter(
-                ParameterType.DOUBLE, "Reproduction threshold",
-                "This value represents the minimun average of specificity and sensibility needed for a bug to reproduce. ", new Double(0.55));
-        public static final Parameter bugChromosomes = new SimpleParameter(
+         public static final Parameter bugChromosomes = new SimpleParameter(
                 ParameterType.INTEGER, "Max mumber of variables",
                 "Maximum mumber of variables for each bug", new Integer(3));
         public static final Parameter classifier = new SimpleParameter(
@@ -54,6 +51,6 @@ public class StartSimulationParameters extends SimpleParameterSet {
                 "% of variables in living in the world", new Integer(30));
 
         public StartSimulationParameters() {
-                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, repThreshold, bugChromosomes, classifier, stoppingCriteria});
+                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, bugChromosomes, classifier, stoppingCriteria});
         }
 }

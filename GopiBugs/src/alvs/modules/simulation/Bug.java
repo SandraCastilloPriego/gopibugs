@@ -194,17 +194,26 @@ public class Bug {
         }
 
         public double getSensitivity() {
-                if (this.sensitivity == Double.NaN) {
+                if ((Double.isNaN(this.sensitivity))) {
                         return 0.0;
                 }
                 return this.sensitivity;
         }
 
         public double getSpecificity() {
-                if (this.specificity == Double.NaN) {
+                if ((Double.isNaN(this.specificity))) {
                         return 0.0;
                 }
                 return this.specificity;
+        }
+
+        public double getCombinedMetric() {
+                double value = 2 * ((this.sensitivity * this.specificity) / (this.sensitivity + this.specificity));
+                if (Double.isNaN(value)) {
+                        return 0.0;
+                } else {
+                        return value;
+                }
         }
 
         public List<PeakListRow> getRows() {
@@ -264,7 +273,7 @@ public class Bug {
                 }
         }
 
-        public void eat(int nBugs) {
+        public void eat() {
 
                 total++;
 
@@ -290,6 +299,10 @@ public class Bug {
 
                 this.sensitivity = this.sen / this.totalsen;
                 this.specificity = this.spec / this.totalspec;
+        }
+
+        public void increaseEnergy() {
+                this.life += 0.5;
         }
 
         public void kill() {

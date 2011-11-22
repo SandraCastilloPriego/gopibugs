@@ -59,7 +59,6 @@ public class StartSimulationTask {
         private World world;
         private JInternalFrame frame;
         private int numberOfBugsCopies, worldSize, bugLife, iterations, maxBugs = 1000, maxVariables;
-        private double repThreshold;
         private classifiersEnum classifier = classifiersEnum.Automatic_Selection;
         private JTextArea textArea;
         private List<Range> ranges;
@@ -85,7 +84,6 @@ public class StartSimulationTask {
                 this.maxBugs = (Integer) parameters.getParameterValue(StartSimulationParameters.bugLimit);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
-                this.repThreshold = (Double) parameters.getParameterValue(StartSimulationParameters.repThreshold);
 
                 this.maxVariables = (Integer) parameters.getParameterValue(StartSimulationParameters.bugChromosomes);
                 this.classifier = (classifiersEnum) parameters.getParameterValue(StartSimulationParameters.classifier);
@@ -170,7 +168,7 @@ public class StartSimulationTask {
                 this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
                 this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
 
-                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, this.repThreshold, this.maxVariables, this.classifier);
+                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, this.maxVariables, this.classifier);
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
                 canvasPanel.add(canvas);
@@ -261,7 +259,7 @@ public class StartSimulationTask {
                 };
 
                 for (Bug bug : bugs) {
-                        if (bug.getAge() > ((this.bugLife / 3) * 2) && bug.getSpecSenAverage() > this.repThreshold) {
+                        if (bug.getAge() > ((this.bugLife / 3) * 2)) {
                                 Result result = new Result();
                                 result.Classifier = bug.getClassifierType().name();
                                 List<Integer> ids = new ArrayList<Integer>();

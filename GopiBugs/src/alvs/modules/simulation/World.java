@@ -51,7 +51,7 @@ public class World {
 
         public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
                 List<Bug> bugs, int numberOfBugsCopies, int bugLife, JTextArea text,
-                List<Result> results, int bugsLimitNumber, double repThreshold, int maxVariables, classifiersEnum classifier) {
+                List<Result> results, int bugsLimitNumber, int maxVariables, classifiersEnum classifier) {
                 this.training = training;
                 this.validation = validation;
                 this.cellsPerSide = cellsPerSide;
@@ -76,7 +76,7 @@ public class World {
                         for (int i = 0; i < cellsPerSide; i++) {
                                 cells[i] = new Cell[cellsPerSide];
                                 for (int j = 0; j < cells[i].length; j++) {
-                                        cells[i][j] = new Cell(bugLife, repThreshold, maxVariables);
+                                        cells[i][j] = new Cell(bugLife, maxVariables);
                                         this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
                                 }
                         }
@@ -229,7 +229,7 @@ public class World {
         private synchronized void eat() {
                 for (Bug bug : population) {
                         try {
-                                bug.eat(this.population.size());
+                                bug.eat();
                         } catch (NullPointerException e) {
                                 e.printStackTrace();
                         }
@@ -240,7 +240,7 @@ public class World {
                 Comparator<Bug> c = new Comparator<Bug>() {
 
                         public int compare(Bug o1, Bug o2) {
-                                if (o1.getSpecSenAverage() < o2.getSpecSenAverage()) {
+                                if (o1.getCombinedMetric() < o2.getCombinedMetric()) {
                                         return 1;
                                 } else {
                                         return -1;
