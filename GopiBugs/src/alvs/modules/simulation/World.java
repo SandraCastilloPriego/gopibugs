@@ -26,6 +26,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import javax.swing.JTextArea;
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math.optimization.OptimizationException;
+import org.apache.commons.math.optimization.fitting.PolynomialFitter;
+import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
 
 /**
  *
@@ -42,16 +47,19 @@ public class World {
         int jump = 1;
         int cicleNumber = 0;
         int bugLife;
-        int maxVariables;
+        int maxVariables = 1;
+        boolean changeNVariables = false;
         JTextArea text;
         List<Result> results;
         int printCount = 0;
         int bugsLimitNumber;
         classifiersEnum classifier;
+        PolynomialFitter fitter;
+        boolean fixNumber = false;
 
         public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
                 List<Bug> bugs, int numberOfBugsCopies, int bugLife, JTextArea text,
-                List<Result> results, int bugsLimitNumber, int maxVariables, classifiersEnum classifier) {
+                List<Result> results, int bugsLimitNumber, int maxVariables, classifiersEnum classifier, PolynomialFitter fitter, boolean fixNumber) {
                 this.training = training;
                 this.validation = validation;
                 this.cellsPerSide = cellsPerSide;
@@ -63,6 +71,12 @@ public class World {
                 this.text = text;
                 this.bugsLimitNumber = bugsLimitNumber;
                 this.classifier = classifier;
+                this.fixNumber = fixNumber;
+                if (fitter != null) {
+                        this.fitter = fitter;
+                } else {
+                        this.fitter = new PolynomialFitter(3, new LevenbergMarquardtOptimizer());
+                }
 
 
                 if (results == null) {
@@ -137,12 +151,19 @@ public class World {
                 }
         }
 
+        public int getMaxVariables() {
+                return this.maxVariables;
+        }
+
         public void cicle() {
                 movement();
                 eat();
 
                 for (Cell[] cellArray : cells) {
                         for (Cell cell : cellArray) {
+                                if (this.changeNVariables) {
+                                        cell.setMaxVariable(maxVariables);
+                                }
                                 List<Bug> childs = cell.reproduction();
                                 if (childs != null) {
                                         for (Bug child : childs) {
@@ -162,6 +183,7 @@ public class World {
                 this.cicleNumber++;
                 this.printCount++;
 
+                this.changeNVariables = false;
 
         }
 
@@ -248,7 +270,7 @@ public class World {
                         }
                 };
 
-                Collections.sort(population, c);
+                Collections.sort(population, c);                
                 for (int i = this.bugsLimitNumber; i < this.population.size(); i++) {
                         population.get(i).kill();
                 }
@@ -261,6 +283,10 @@ public class World {
                                 if (bug.isDead()) {
                                         deadBugs.add(bug);
                                         this.cells[bug.getx()][bug.gety()].removeBug(bug);
+                                } else {
+                                        if (this.changeNVariables) {
+                                                bug.setMaxVariable(maxVariables);
+                                        }
                                 }
                         } catch (Exception e) {
                         }
@@ -268,6 +294,15 @@ public class World {
                 for (Bug bug : deadBugs) {
                         this.population.remove(bug);
                 }
+        }
+
+        public void setVariables() {
+                int newMaxVariables = addVariable();
+                if (newMaxVariables != this.maxVariables) {
+                        this.maxVariables = newMaxVariables;
+                        this.changeNVariables = true;
+                }
+                System.out.println(this.maxVariables);
         }
 
         public class Population implements Comparable<Bug> {
@@ -352,5 +387,66 @@ public class World {
 
         public List<Result> getResult() {
                 return this.results;
+        }
+
+        public void addNewPoint() {
+                if (!fixNumber) {
+                        double error = 0;
+                        int numOfVars = 0;
+                        for (int i = 0; i < 50; i++) {
+                                Bug bug = this.population.get(i);
+                                error += bug.getTestError();
+                                numOfVars += bug.getRows().size();
+                                if (i > 0) {
+                                        error /= 2;
+                                        numOfVars /= 2;
+                                }
+                        }
+                        fitter.addObservedPoint(1, numOfVars, error);
+                }
+        }
+
+        public int addVariable() {
+
+                int numOfVars = 0;
+                for (int i = 0; i < 50; i++) {
+                        Bug bug = this.population.get(i);
+                        numOfVars += bug.getRows().size();
+                        if (i > 0) {
+                                numOfVars /= 2;
+                        }
+                }
+                if (!this.fixNumber) {
+                        int newVars = 0;
+                        try {
+
+                                PolynomialFunction fitted = fitter.fit();
+                                System.out.println(fitted.derivative().value(numOfVars - 1));
+                                if (fitted.derivative().value(numOfVars - 1) <= 0) {
+                                        numOfVars++;
+                                } else {
+                                        this.fixNumber = true;
+                                        numOfVars--;
+                                }
+                                if (numOfVars < 2) {
+                                        return 2;
+                                }
+                                return numOfVars;
+                        } catch (FunctionEvaluationException ex) {
+                                return numOfVars;
+                        } catch (OptimizationException ex) {
+                                return numOfVars;
+                        }
+                } else {
+                        return numOfVars;
+                }
+        }
+
+        public PolynomialFitter getfitter() {
+                return this.fitter;
+        }
+
+        public boolean getFixNumber() {
+                return this.fixNumber;
         }
 }

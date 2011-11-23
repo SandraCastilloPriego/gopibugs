@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Random;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import org.apache.commons.math.optimization.fitting.PolynomialFitter;
 
 /**
  *
@@ -58,12 +59,12 @@ public class StartSimulationTask {
         private JPanel canvasPanel;
         private World world;
         private JInternalFrame frame;
-        private int numberOfBugsCopies, worldSize, bugLife, iterations, maxBugs = 1000, maxVariables;
+        private int numberOfBugsCopies, worldSize, bugLife, iterations, maxBugs = 1000;
         private classifiersEnum classifier = classifiersEnum.Automatic_Selection;
         private JTextArea textArea;
         private List<Range> ranges;
         private Random rand;
-        private int totalIDs, stoppingCriteria, stopCounting = 0;
+        private int totalIDs, stoppingCriteria, stopCounting = 0, counter = 0;
         private double minCountId = 100;
         private List<Result> results;
         private boolean showResults, showCanvas;
@@ -84,8 +85,6 @@ public class StartSimulationTask {
                 this.maxBugs = (Integer) parameters.getParameterValue(StartSimulationParameters.bugLimit);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
-
-                this.maxVariables = (Integer) parameters.getParameterValue(StartSimulationParameters.bugChromosomes);
                 this.classifier = (classifiersEnum) parameters.getParameterValue(StartSimulationParameters.classifier);
 
 
@@ -152,7 +151,7 @@ public class StartSimulationTask {
                         Range range = ranges.get(index);
 
                         // Starts the simulation (first cicle with the selected range of samples)
-                        this.startCicle(range, null, null);
+                        this.startCicle(range, null, null, 1, null, false);
 
                         status = TaskStatus.FINISHED;
                 } catch (Exception e) {
@@ -161,14 +160,17 @@ public class StartSimulationTask {
                 }
         }
 
-        private void startCicle(Range range, List<Bug> bugs, List<Result> results) {
+        private void startCicle(Range range, List<Bug> bugs, List<Result> results, int maxVariables, PolynomialFitter fitter, boolean fixNumber) {
                 DesktopParameters desktopParameters = (DesktopParameters) ALVSCore.getDesktop().getParameterSet();
                 ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
 
                 this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
                 this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
 
-                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, this.maxVariables, this.classifier);
+                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, maxVariables, this.classifier, fitter, fixNumber);
+                if (bugs == null) {
+                        world.setVariables();
+                }
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
                 canvasPanel.add(canvas);
@@ -214,17 +216,20 @@ public class StartSimulationTask {
                                         canvas.update(canvas.getGraphics());
                                 }
                                 world.cicle();
+                                world.addNewPoint();
                         }
-
+                        counter++;
+                        if (counter > 10) {
+                                world.setVariables();
+                                counter = 0;
+                        }
                         int index = rand.nextInt(ranges.size() - 1);
                         Range range = ranges.get(index);
                         if (showResults) {
                                 printResult(world.getBugs(), range);
                         }
 
-                        /* If the number of different variable combination doesn't change, the
-                        simulation will stop after 15 cicles.
-                         */
+
                         // Counting the number of variables in the world
                         int count = countIDs();
                         double result = ((double) ((double) count / (double) training.getNumberRows())) * 100;
@@ -240,7 +245,7 @@ public class StartSimulationTask {
                         if (result <= stoppingCriteria || stopCounting > 25000) {
                                 printResult(world.getBugs(), range);
                         } else {
-                                startCicle(range, world.getBugs(), world.getResult());
+                                startCicle(range, world.getBugs(), world.getResult(), world.getMaxVariables(), world.getfitter(), world.getFixNumber());
                         }
                 }
         }

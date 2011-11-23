@@ -50,6 +50,10 @@ public class Cell {
                 this.type = type;
         }
 
+        public void setMaxVariable(int maxVariable) {
+                this.maxVariable = maxVariable;
+        }
+
         public Range getRange() {
                 return range;
         }
@@ -90,11 +94,11 @@ public class Cell {
                                         if (mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
                                                 if (isKilling(mother.getCombinedMetric() - father.getCombinedMetric())) {
                                                         father.kill();
-                                                        mother.increaseEnergy();
+                                                       // mother.increaseEnergy();
                                                 } else if (isKilling(father.getCombinedMetric() - mother.getCombinedMetric())) {
                                                         mother.kill();
-                                                        father.increaseEnergy();
-                                                } else if (mother != father) {
+                                                      //  father.increaseEnergy();
+                                                } else if (mother != father && mother.isClassified() && father.isClassified()) {
                                                         mother.addLife();
                                                         childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
                                                 }

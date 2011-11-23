@@ -81,6 +81,7 @@ public class Bug {
         boolean fixValue = false;
         Range range;
         int[] clusters;
+        Instances training, test;
 
         public Bug(int x, int y, Cell cell, PeakListRow row, BugDataset dataset, int bugLife, int maxVariable, classifiersEnum classifier) {
                 rand = new Random();
@@ -147,6 +148,10 @@ public class Bug {
                         clusters[i] = rowList.get(i).getCluster();
                 }
 
+        }
+
+        public void setMaxVariable(int maxVariable) {
+                this.MAXNUMBERGENES = maxVariable;
         }
 
         private void assingGenes(Bug parent, boolean isFather) {
@@ -263,10 +268,10 @@ public class Bug {
 
         public void classify(Range range) {
                 try {
-                        Instances data = getWekaDataset(range);
+                        getWekaTrainingDataset(range);
                         classifier = setClassifier();
                         if (classifier != null) {
-                                classifier.buildClassifier(data);
+                                classifier.buildClassifier(training);
                         }
                 } catch (Exception ex) {
                         Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
@@ -283,7 +288,7 @@ public class Bug {
                         this.totalsen++;
                 }
 
-                if (isClassify()) {
+                if (isClassified()) {
                         wellClassified++;
 
                         this.life += 0.5;
@@ -313,44 +318,60 @@ public class Bug {
                 this.life++;
         }
 
-        public boolean isClassify() {
-                String sampleName = this.cell.getSampleName();
-                FastVector attributes = new FastVector();
-                for (int i = 0; i < rowList.size(); i++) {
-                        Attribute weight = new Attribute("weight" + i);
-                        attributes.addElement(weight);
-                }
-                FastVector labels = new FastVector();
-                labels.addElement("1");
-                labels.addElement("2");
-                Attribute type = new Attribute("class", labels);
-                attributes.addElement(type);
-                //Creates the dataset
-                Instances cellDataset = new Instances("Train Dataset", attributes, 0);
-                double[] values = new double[cellDataset.numAttributes()];
-                int cont = 0;
-                for (PeakListRow row : rowList) {
-                        values[cont++] = (Double) row.getPeak(sampleName);
-                }
-                values[cont] = cellDataset.attribute(cellDataset.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
-                Instance inst = new SparseInstance(1.0, values);
-                cellDataset.add(inst);
-                cellDataset.setClassIndex(cont);
+        public boolean isClassified() {
                 try {
-                        // System.out.println(" hola " +cellDataset.instance(0));
-                        double pred = classifier.classifyInstance(cellDataset.instance(0));
-                        if (cell.type.equals(cellDataset.classAttribute().value((int) pred))) {
+                        int index = rand.nextInt(test.numInstances());
+                        int pred = (int) classifier.classifyInstance(test.instance(index));
+                        int value = (int) test.instance(index).classValue();
+                        value++;
+                        if (Integer.valueOf(test.instance(index).classAttribute().value(pred)) == value) {
                                 return true;
                         } else {
                                 return false;
                         }
                 } catch (Exception ex) {
-                        this.kill();
-                        //Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
+                        ex.printStackTrace();
+                        return false;
                 }
-                return false;
         }
 
+        /* public boolean isClassify() {
+        String sampleName = this.cell.getSampleName();
+        FastVector attributes = new FastVector();
+        for (int i = 0; i < rowList.size(); i++) {
+        Attribute weight = new Attribute("weight" + i);
+        attributes.addElement(weight);
+        }
+        FastVector labels = new FastVector();
+        labels.addElement("1");
+        labels.addElement("2");
+        Attribute type = new Attribute("class", labels);
+        attributes.addElement(type);
+        //Creates the dataset
+        Instances cellDataset = new Instances("Train Dataset", attributes, 0);
+        double[] values = new double[cellDataset.numAttributes()];
+        int cont = 0;
+        for (PeakListRow row : rowList) {
+        values[cont++] = (Double) row.getPeak(sampleName);
+        }
+        values[cont] = cellDataset.attribute(cellDataset.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
+        Instance inst = new SparseInstance(1.0, values);
+        cellDataset.add(inst);
+        cellDataset.setClassIndex(cont);
+        try {
+        // System.out.println(" hola " +cellDataset.instance(0));
+        double pred = classifier.classifyInstance(cellDataset.instance(0));
+        if (cell.type.equals(cellDataset.classAttribute().value((int) pred))) {
+        return true;
+        } else {
+        return false;
+        }
+        } catch (Exception ex) {
+        this.kill();
+        //Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+        }*/
         private Classifier setClassifier() {
                 switch (this.classifierType) {
                         case Logistic:
@@ -421,7 +442,7 @@ public class Bug {
                 }
         }
 
-        private Instances getWekaDataset(Range range) {
+        private void getWekaTrainingDataset(Range range) {
                 try {
 
                         FastVector attributes = new FastVector();
@@ -440,31 +461,59 @@ public class Bug {
                         attributes.addElement(type);
 
                         //Creates the dataset
-                        Instances data = new Instances("Dataset", attributes, 0);
+                        this.training = new Instances("Dataset", attributes, 0);
+                        this.test = new Instances("test Dataset", attributes, 0);
 
                         for (int i = 0; i < this.dataset.getNumberCols(); i++) {
                                 if (!range.contains(i)) {
                                         String sampleName = dataset.getAllColumnNames().elementAt(i);
 
-                                        double[] values = new double[data.numAttributes()];
+                                        double[] values = new double[training.numAttributes()];
                                         int cont = 0;
                                         for (PeakListRow row : rowList) {
                                                 values[cont++] = (Double) row.getPeak(sampleName);
                                         }
-                                        values[cont] = data.attribute(data.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
+                                        values[cont] = training.attribute(training.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
 
                                         Instance inst = new SparseInstance(1.0, values);
-                                        data.add(inst);
+                                        training.add(inst);
+                                } else {
+                                        String sampleName = dataset.getAllColumnNames().elementAt(i);
+
+                                        double[] values = new double[test.numAttributes()];
+                                        int cont = 0;
+                                        for (PeakListRow row : rowList) {
+                                                values[cont++] = (Double) row.getPeak(sampleName);
+                                        }
+                                        values[cont] = test.attribute(test.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
+
+                                        Instance inst = new SparseInstance(1.0, values);
+                                        test.add(inst);
+
                                 }
                         }
 
-                        data.setClass(type);
+                        training.setClass(type);
+                        test.setClass(type);
 
-                        return data;
+
                 } catch (Exception ex) {
                         Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
-                        return null;
+
                 }
 
+        }
+
+        public double getTestError() {
+                try {
+                        Evaluation evalC = new Evaluation(training);
+                       // evalC.crossValidateModel(classifier, training, 10, new Random(1));
+                        evalC.evaluateModel(classifier, test);
+                        double CVError = 1 - evalC.fMeasure(0);
+                        return CVError;
+                } catch (Exception ex) {
+                        ex.printStackTrace();
+                        return -1.0;
+                }
         }
 }
