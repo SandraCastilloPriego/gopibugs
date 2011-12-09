@@ -26,11 +26,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import javax.swing.JTextArea;
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math.optimization.OptimizationException;
-import org.apache.commons.math.optimization.fitting.PolynomialFitter;
-import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
 
 /**
  *
@@ -54,12 +49,13 @@ public class World {
         int printCount = 0;
         int bugsLimitNumber;
         classifiersEnum classifier;
-        PolynomialFitter fitter;
-        boolean fixNumber = false;
+        boolean firstCycle = true;
+        int numberOfBugsCopies;
+        Range range;
 
         public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
-                List<Bug> bugs, int numberOfBugsCopies, int bugLife, JTextArea text,
-                List<Result> results, int bugsLimitNumber, int maxVariables, classifiersEnum classifier, PolynomialFitter fitter, boolean fixNumber) {
+                int numberOfBugsCopies, int bugLife, JTextArea text,
+                int bugsLimitNumber, int maxVariables, classifiersEnum classifier) {
                 this.training = training;
                 this.validation = validation;
                 this.cellsPerSide = cellsPerSide;
@@ -71,19 +67,11 @@ public class World {
                 this.text = text;
                 this.bugsLimitNumber = bugsLimitNumber;
                 this.classifier = classifier;
-                this.fixNumber = fixNumber;
-                if (fitter != null) {
-                        this.fitter = fitter;
-                } else {
-                        this.fitter = new PolynomialFitter(3, new LevenbergMarquardtOptimizer());
-                }
+                this.numberOfBugsCopies = numberOfBugsCopies;
+                this.range = range;
 
+                this.results = new ArrayList<Result>();
 
-                if (results == null) {
-                        this.results = new ArrayList<Result>();
-                } else {
-                        this.results = results;
-                }
 
                 if (training != null) {
                         cells = new Cell[cellsPerSide][cellsPerSide];
@@ -95,27 +83,17 @@ public class World {
                                 }
                         }
 
-                        if (bugs == null) {
-                                for (int i = 0; i < numberOfBugsCopies; i++) {
-                                        for (PeakListRow row : training.getRows()) {
-                                                this.addBug(row);
-                                        }
-                                }
-                        } else {
-                                this.population = bugs;
-                                for (Bug bug : this.population) {
-                                        bug.classify(range);
+
+                        for (int i = 0; i < numberOfBugsCopies; i++) {
+                                for (PeakListRow row : training.getRows()) {
+                                        this.addBug(row);
                                 }
                         }
-                }
 
-
-                /* for(int i = 0; i < 10; i++){
-                Bug bug = this.population.get(i);
-                for(PeakListRow row :bug.getRows()){
-                this.addBug(row);
                 }
-                }*/
+                for (PeakListRow row : training.getRows()) {
+                        this.addBug(row);
+                }              
         }
 
         private void setSamplesInCell(Vector<String> samplesNames, Cell cell, Range range) {
@@ -262,7 +240,7 @@ public class World {
                 Comparator<Bug> c = new Comparator<Bug>() {
 
                         public int compare(Bug o1, Bug o2) {
-                                if (o1.getCombinedMetric() < o2.getCombinedMetric()) {
+                                if (o1.getFMeasure() < o2.getFMeasure()) {
                                         return 1;
                                 } else {
                                         return -1;
@@ -270,7 +248,7 @@ public class World {
                         }
                 };
 
-                Collections.sort(population, c);                
+                Collections.sort(population, c);
                 for (int i = this.bugsLimitNumber; i < this.population.size(); i++) {
                         population.get(i).kill();
                 }
@@ -295,158 +273,77 @@ public class World {
                         this.population.remove(bug);
                 }
         }
-
-        public void setVariables() {
-                int newMaxVariables = addVariable();
-                if (newMaxVariables != this.maxVariables) {
-                        this.maxVariables = newMaxVariables;
-                        this.changeNVariables = true;
-                }
-                System.out.println(this.maxVariables);
-        }
-
-        public class Population implements Comparable<Bug> {
-
-                double specificity;
-
-                public Population(double specificity) {
-                        this.specificity = specificity;
-                }
-
-                public int compareTo(Bug o) {
-                        if (this.specificity < o.getSpecificity()) {
-                                return -1;
-                        } else {
-                                return 1;
-                        }
-                }
-        }
-
-        public void printResult(Range range) {
-                this.results.clear();
-                Comparator<Result> c = new Comparator<Result>() {
-
-                        public int compare(Result o1, Result o2) {
-                                if (o1.aucT < o2.aucV) {
-                                        return 1;
-                                } else {
-                                        return -1;
-                                }
-                        }
-                };
-
-
-                int contbug = 0;
-                for (Bug bug : this.getBugs()) {
-                        if (bug.getSensitivity() > 0.6 && bug.getSpecificity() > 0.6 && bug.getAge() > 400) {
-                                Result result = new Result();
-                                result.Classifier = bug.getClassifierType().name();
-                                List<Integer> ids = new ArrayList<Integer>();
-                                for (PeakListRow row : bug.getRows()) {
-                                        result.addValue(String.valueOf(row.getID()));
-                                        ids.add(row.getID());
-                                }
-
-                                TestBug testing = new TestBug(ids, bug.getClassifierType(), training, validation);
-                                double[] values = testing.prediction();
-                                result.tspecificity = values[0];
-                                result.tsensitivity = values[1];
-                                result.aucT = values[2];
-                                result.vspecificity = values[3];
-                                result.vsensitivity = values[4];
-                                result.aucV = values[5];
-                                boolean isIt = false;
-                                for (Result r : this.results) {
-                                        if (r.isIt(result.getValues(), result.Classifier)) {
-                                                r.count();
-                                                isIt = true;
-                                        }
-                                }
-
-                                if (!isIt) {
-                                        this.results.add(result);
-                                }
-
-                                contbug++;
-                        }
-                }
-
-                Collections.sort(results, c);
-
-                contbug = 0;
-                String result = range.toString() + " \n";
-
-                for (Result r : results) {
-                        result += r.toString();
-                        contbug++;
-                }
-
-                this.text.setText(result);
-
-        }
-
+      
         public List<Result> getResult() {
                 return this.results;
         }
 
-        public void addNewPoint() {
-                if (!fixNumber) {
-                        double error = 0;
-                        int numOfVars = 0;
-                        for (int i = 0; i < 50; i++) {
-                                Bug bug = this.population.get(i);
-                                error += bug.getTestError();
-                                numOfVars += bug.getRows().size();
-                                if (i > 0) {
-                                        error /= 2;
-                                        numOfVars /= 2;
-                                }
+        public double[] getNewPoints(int nPoints) {
+                int counter = 0;
+                double[] points = new double[nPoints + 1];
+                for (int i = 0; i < this.population.size(); i++) {
+                        Bug bug = this.population.get(i);
+                        if ((bug.getRows().size() == this.maxVariables)) {
+                                points[counter++] = bug.getTestError();
                         }
-                        fitter.addObservedPoint(1, numOfVars, error);
+                        if (counter == nPoints) {
+                                break;
+                        }
                 }
+                return points;
         }
+
+        /*public int getFinalVariable() {
+        try {
+        int numOfVars = 0;
+        for (int i = 0; i < 20; i++) {
+        Bug bug = this.population.get(i);
+        numOfVars += bug.getRows().size();
+        if (i > 0) {
+        numOfVars /= 2;
+        }
+        }
+
+        PolynomialFunction fitted = fitter.fit();
+        for (int i = 3; i < numOfVars + 5; i++) {
+        double value = fitted.derivative().value(i);
+        System.out.println(i + " - " + value);
+        if (value > 0) {
+        numOfVars = i - 1;
+        break;
+        }
+        }
+
+        System.out.println("Number max:" + numOfVars);
+        return numOfVars;
+        } catch (FunctionEvaluationException ex) {
+        return -1;
+
+        } catch (OptimizationException ex) {
+        return -1;
+        }
+        }*
 
         public int addVariable() {
 
-                int numOfVars = 0;
-                for (int i = 0; i < 50; i++) {
-                        Bug bug = this.population.get(i);
-                        numOfVars += bug.getRows().size();
-                        if (i > 0) {
-                                numOfVars /= 2;
-                        }
-                }
-                if (!this.fixNumber) {
-                        int newVars = 0;
-                        try {
+        numOfVars++;
 
-                                PolynomialFunction fitted = fitter.fit();
-                                System.out.println(fitted.derivative().value(numOfVars - 1));
-                                if (fitted.derivative().value(numOfVars - 1) <= 0) {
-                                        numOfVars++;
-                                } else {
-                                        this.fixNumber = true;
-                                        numOfVars--;
-                                }
-                                if (numOfVars < 2) {
-                                        return 2;
-                                }
-                                return numOfVars;
-                        } catch (FunctionEvaluationException ex) {
-                                return numOfVars;
-                        } catch (OptimizationException ex) {
-                                return numOfVars;
-                        }
-                } else {
-                        return numOfVars;
-                }
+        return numOfVars;
+
+
         }
 
         public PolynomialFitter getfitter() {
-                return this.fitter;
+        return this.fitter;
         }
+         */
+        public void restart(Range newRange) {
+                for (Cell[] cellArray : cells) {
+                        for (Cell cell : cellArray) {
+                              cell.setRange(newRange);
+                        }
+                }
 
-        public boolean getFixNumber() {
-                return this.fixNumber;
+
         }
 }

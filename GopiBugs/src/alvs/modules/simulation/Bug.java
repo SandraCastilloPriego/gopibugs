@@ -212,8 +212,8 @@ public class Bug {
                 return this.specificity;
         }
 
-        public double getCombinedMetric() {
-                double value = 2 * ((this.sensitivity * this.specificity) / (this.sensitivity + this.specificity));
+        public double getFMeasure() {
+                double value = (2 * this.sensitivity * this.specificity) / (this.sensitivity + this.specificity);
                 if (Double.isNaN(value)) {
                         return 0.0;
                 } else {
@@ -268,13 +268,14 @@ public class Bug {
 
         public void classify(Range range) {
                 try {
-                        getWekaTrainingDataset(range);
+                        getWekaDataset(range);
                         classifier = setClassifier();
                         if (classifier != null) {
                                 classifier.buildClassifier(training);
                         }
                 } catch (Exception ex) {
-                        Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
+                        ex.printStackTrace();
+                        //Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
                 }
         }
 
@@ -330,48 +331,11 @@ public class Bug {
                                 return false;
                         }
                 } catch (Exception ex) {
-                        ex.printStackTrace();
+                       // ex.printStackTrace();
                         return false;
                 }
         }
 
-        /* public boolean isClassify() {
-        String sampleName = this.cell.getSampleName();
-        FastVector attributes = new FastVector();
-        for (int i = 0; i < rowList.size(); i++) {
-        Attribute weight = new Attribute("weight" + i);
-        attributes.addElement(weight);
-        }
-        FastVector labels = new FastVector();
-        labels.addElement("1");
-        labels.addElement("2");
-        Attribute type = new Attribute("class", labels);
-        attributes.addElement(type);
-        //Creates the dataset
-        Instances cellDataset = new Instances("Train Dataset", attributes, 0);
-        double[] values = new double[cellDataset.numAttributes()];
-        int cont = 0;
-        for (PeakListRow row : rowList) {
-        values[cont++] = (Double) row.getPeak(sampleName);
-        }
-        values[cont] = cellDataset.attribute(cellDataset.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
-        Instance inst = new SparseInstance(1.0, values);
-        cellDataset.add(inst);
-        cellDataset.setClassIndex(cont);
-        try {
-        // System.out.println(" hola " +cellDataset.instance(0));
-        double pred = classifier.classifyInstance(cellDataset.instance(0));
-        if (cell.type.equals(cellDataset.classAttribute().value((int) pred))) {
-        return true;
-        } else {
-        return false;
-        }
-        } catch (Exception ex) {
-        this.kill();
-        //Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
-        }*/
         private Classifier setClassifier() {
                 switch (this.classifierType) {
                         case Logistic:
@@ -433,16 +397,7 @@ public class Bug {
 
         }
 
-        public double getSpecSenAverage() {
-                double value = (this.getSpecificity() + this.getSensitivity()) / 2;
-                if (value != Double.NaN) {
-                        return value;
-                } else {
-                        return 0;
-                }
-        }
-
-        private void getWekaTrainingDataset(Range range) {
+        private void getWekaDataset(Range range) {
                 try {
 
                         FastVector attributes = new FastVector();
@@ -507,13 +462,17 @@ public class Bug {
         public double getTestError() {
                 try {
                         Evaluation evalC = new Evaluation(training);
-                       // evalC.crossValidateModel(classifier, training, 10, new Random(1));
-                        evalC.evaluateModel(classifier, test);
+                       evalC.crossValidateModel(classifier, training, 10, new Random(1));
+                        // evalC.evaluateModel(classifier, test);
                         double CVError = 1 - evalC.fMeasure(0);
                         return CVError;
                 } catch (Exception ex) {
                         ex.printStackTrace();
                         return -1.0;
                 }
+        }
+
+        void setNewRange(Range newRange) {
+                this.range = newRange;
         }
 }

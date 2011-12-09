@@ -46,8 +46,11 @@ public class StartSimulationParameters extends SimpleParameterSet {
         public static final Parameter stoppingCriteria = new SimpleParameter(
                 ParameterType.INTEGER, "Stopping criteria (%)",
                 "% of variables in living in the world", new Integer(30));
+        public static final Parameter numberOfVariables = new SimpleParameter(
+                ParameterType.INTEGER, "Number of variables",
+                "Maximum number of Variables. Set \"-1\" if the selection has to be done automatically", new Integer(-1));
 
         public StartSimulationParameters() {
-                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, classifier, stoppingCriteria});
+                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, classifier, stoppingCriteria, numberOfVariables});
         }
 }

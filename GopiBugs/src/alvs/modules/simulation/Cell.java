@@ -79,7 +79,7 @@ public class Cell {
                         Comparator<Bug> c = new Comparator<Bug>() {
 
                                 public int compare(Bug o1, Bug o2) {
-                                        if (o1.getCombinedMetric() < o2.getCombinedMetric()) {
+                                        if (o1.getFMeasure() < o2.getFMeasure()) {
                                                 return 1;
                                         } else {
                                                 return -1;
@@ -92,14 +92,14 @@ public class Cell {
                                 Bug mother = bugsInside.get(0);
                                 for (Bug father : this.bugsInside) {
                                         if (mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
-                                                if (isKilling(mother.getCombinedMetric() - father.getCombinedMetric())) {
+                                                if (isKilling(mother.getFMeasure() - father.getFMeasure()) && father.getRows().size() > 1) {
                                                         father.kill();
-                                                       // mother.increaseEnergy();
-                                                } else if (isKilling(father.getCombinedMetric() - mother.getCombinedMetric())) {
+                                                        // mother.increaseEnergy();
+                                                } else if (isKilling(father.getFMeasure() - mother.getFMeasure()) && mother.getRows().size() > 1) {
                                                         mother.kill();
-                                                      //  father.increaseEnergy();
+                                                        //  father.increaseEnergy();
                                                 } else if (mother != father && mother.isClassified() && father.isClassified()) {
-                                                        mother.addLife();
+                                                        // mother.addLife();
                                                         childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
                                                 }
                                         }
@@ -116,10 +116,18 @@ public class Cell {
                         return false;
                 }
                 double value = Math.random();
-                if (value < difference) {
+                if (value < difference - 0.1) {
                         return true;
                 } else {
                         return false;
+                }
+        }
+
+        void setRange(Range newRange) {
+                this.range = newRange;
+                for(Bug bug : this.bugsInside){
+                        bug.setNewRange(newRange);
+                        bug.classify(newRange);
                 }
         }
 }

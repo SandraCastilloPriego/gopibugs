@@ -37,13 +37,20 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import java.util.List;
 import java.util.Random;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.analysis.UnivariateRealFunction;
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math.optimization.OptimizationException;
 import org.apache.commons.math.optimization.fitting.PolynomialFitter;
+import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
 
 /**
  *
@@ -57,17 +64,19 @@ public class StartSimulationTask {
         private sinkThread thread;
         private CanvasWorld canvas;
         private JPanel canvasPanel;
-        private World world;
         private JInternalFrame frame;
         private int numberOfBugsCopies, worldSize, bugLife, iterations, maxBugs = 1000;
         private classifiersEnum classifier = classifiersEnum.Automatic_Selection;
         private JTextArea textArea;
         private List<Range> ranges;
         private Random rand;
-        private int totalIDs, stoppingCriteria, stopCounting = 0, counter = 0;
+        private int totalIDs, stoppingCriteria, stopCounting = 0;
         private double minCountId = 100;
         private List<Result> results;
         private boolean showResults, showCanvas;
+        private int userDefinedMaxNVariables;
+        PolynomialFitter fitter;
+        int[] counter;
 
         public StartSimulationTask(BugDataset[] datasets, SimpleParameterSet parameters) {
                 for (BugDataset dataset : datasets) {
@@ -84,9 +93,8 @@ public class StartSimulationTask {
                 this.iterations = (Integer) parameters.getParameterValue(StartSimulationParameters.iterations);
                 this.maxBugs = (Integer) parameters.getParameterValue(StartSimulationParameters.bugLimit);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
-                this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
                 this.classifier = (classifiersEnum) parameters.getParameterValue(StartSimulationParameters.classifier);
-
+                this.userDefinedMaxNVariables = (Integer) parameters.getParameterValue(StartSimulationParameters.numberOfVariables);
 
 
                 DesktopParameters desktopParameters = (DesktopParameters) ALVSCore.getDesktop().getParameterSet();
@@ -98,6 +106,8 @@ public class StartSimulationTask {
                 this.ranges = new ArrayList<Range>();
                 this.results = new ArrayList<Result>();
                 this.rand = new Random();
+
+                this.fitter = new PolynomialFitter(3, new LevenbergMarquardtOptimizer());
         }
 
         public String getTaskDescription() {
@@ -151,7 +161,15 @@ public class StartSimulationTask {
                         Range range = ranges.get(index);
 
                         // Starts the simulation (first cicle with the selected range of samples)
-                        this.startCicle(range, null, null, 1, null, false);
+                        if (this.userDefinedMaxNVariables == -1) {
+                                counter = new int[10];
+                                for (int i = 2; i < 10; i++) {
+                                        counter[i] = 0;
+                                        this.startCicleVariableNumberSelection(range, i);
+                                }
+                        } else {
+                                this.startCicle(range, this.userDefinedMaxNVariables);
+                        }
 
                         status = TaskStatus.FINISHED;
                 } catch (Exception e) {
@@ -160,22 +178,18 @@ public class StartSimulationTask {
                 }
         }
 
-        private void startCicle(Range range, List<Bug> bugs, List<Result> results, int maxVariables, PolynomialFitter fitter, boolean fixNumber) {
+        private void startCicle(Range range, int maxVariables) {
                 DesktopParameters desktopParameters = (DesktopParameters) ALVSCore.getDesktop().getParameterSet();
                 ConfigurationParameters configuration = (ConfigurationParameters) desktopParameters.getSaveConfigurationParameters();
 
                 this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
                 this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
-
-                world = new World(training, validation, this.worldSize, range, bugs, this.numberOfBugsCopies, this.bugLife, textArea, results, this.maxBugs, maxVariables, this.classifier, fitter, fixNumber);
-                if (bugs == null) {
-                        world.setVariables();
-                }
+                World world = new World(training, validation, this.worldSize, range, this.numberOfBugsCopies, this.bugLife, textArea, this.maxBugs, maxVariables, this.classifier);
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
                 canvasPanel.add(canvas);
                 canvas.setVisible(true);
-                thread = new sinkThread();
+                thread = new sinkThread(world);
                 thread.start();
         }
 
@@ -189,10 +203,10 @@ public class StartSimulationTask {
 
         }
 
-        private int countIDs() {
+        private int countIDs(List<Bug> bugs) {
                 int count = 0;
                 List<Integer> alreadyCount = new ArrayList<Integer>();
-                for (Bug bug : world.getBugs()) {
+                for (Bug bug : bugs) {
                         for (PeakListRow row : bug.getRows()) {
                                 if (!alreadyCount.contains(row.getID())) {
                                         alreadyCount.add(row.getID());
@@ -208,44 +222,49 @@ public class StartSimulationTask {
 
         public class sinkThread extends Thread {
 
+                World world;
+
+                public sinkThread(World world) {
+                        this.world = world;
+                }
+
                 @Override
                 public void run() {
-                        for (int i = 0; i < iterations; i++) {
-                                if (showCanvas) {
-                                        // Paints the graphics
-                                        canvas.update(canvas.getGraphics());
+                        double result = Double.MAX_VALUE;
+                        while (result > stoppingCriteria || stopCounting < 25000) {
+                                for (int i = 0; i < iterations; i++) {
+                                        if (showCanvas) {
+                                                // Paints the graphics
+                                                canvas.update(canvas.getGraphics());
+                                        }
+                                        world.cicle();
                                 }
-                                world.cicle();
-                                world.addNewPoint();
-                        }
-                        counter++;
-                        if (counter > 10) {
-                                world.setVariables();
-                                counter = 0;
-                        }
-                        int index = rand.nextInt(ranges.size() - 1);
-                        Range range = ranges.get(index);
-                        if (showResults) {
-                                printResult(world.getBugs(), range);
-                        }
+
+                                int index = rand.nextInt(ranges.size() - 1);
+                                Range range = ranges.get(index);
+                                if (showResults) {
+                                        printResult(world.getBugs(), range);
+                                }
+
+                                // Counting the number of variables in the world
+                                int count = countIDs(world.getBugs());
+
+                                result = ((double) ((double) count / (double) training.getNumberRows())) * 100;
+
+                                if (result < minCountId) {
+                                        minCountId = result;
+                                        stopCounting = 0;
+                                } else {
+                                        stopCounting++;
+                                }
 
 
-                        // Counting the number of variables in the world
-                        int count = countIDs();
-                        double result = ((double) ((double) count / (double) training.getNumberRows())) * 100;
-                        if (result < minCountId) {
-                                minCountId = result;
-                                stopCounting = 0;
-                        } else {
-                                stopCounting++;
-                        }
-
-
-                        // Checking the stopping criteria
-                        if (result <= stoppingCriteria || stopCounting > 25000) {
-                                printResult(world.getBugs(), range);
-                        } else {
-                                startCicle(range, world.getBugs(), world.getResult(), world.getMaxVariables(), world.getfitter(), world.getFixNumber());
+                                // Checking the stopping criteria
+                                if (result <= stoppingCriteria || stopCounting > 25000) {
+                                        printResult(world.getBugs(), range);
+                                } else {
+                                        world.restart(range);
+                                }
                         }
                 }
         }
@@ -313,5 +332,81 @@ public class StartSimulationTask {
 
                 this.textArea.setText(result);
 
+        }
+
+        public class sinkThreadVariableNumberSelection extends Thread {
+
+                int nVar;
+                World world;
+
+                public sinkThreadVariableNumberSelection(int nVariables, World world) {
+                        this.nVar = nVariables;
+                        this.world = world;
+                }
+
+                @Override
+                public void run() {
+                        for (int iteration = 0; iteration < 20; iteration++) {
+                                for (int i = 0; i < iterations; i++) {
+                                        this.world.cicle();
+                                }
+                                System.out.println("World " + nVar);
+                                int index = rand.nextInt(ranges.size() - 1);
+                                Range range = ranges.get(index);
+
+                                double[] points = this.world.getNewPoints(nVar);
+                                for (int i = 0; i < points.length; i++) {
+                                        fitter.addObservedPoint(1, nVar, points[i]);
+                                }
+                                world.restart(range);
+                                counter[nVar]++;
+                        }
+                        checkSimIsOver();
+                }
+        }
+
+        private void startCicleVariableNumberSelection(Range range, int numberOfVariables) {
+                World iworld = new World(training, validation, this.worldSize, range, this.numberOfBugsCopies, this.bugLife, null, this.maxBugs, numberOfVariables, this.classifier);
+                sinkThreadVariableNumberSelection thread = new sinkThreadVariableNumberSelection(numberOfVariables, iworld);
+                thread.start();
+        }
+
+        public void checkSimIsOver() {
+                boolean allOver = true;
+
+                for (int i = 2; i < 10; i++) {
+                        if (counter[i] < 20) {
+                                allOver = false;
+                        }
+                }
+
+                if (allOver) {
+                        try {
+                                PolynomialFunction function = fitter.fit();
+                                for (int i = 2; i < 10; i++) {
+                                        System.out.println(i + " - " + function.value(i));
+                                }
+                                UnivariateRealFunction derivative = function.derivative();
+                                int var = 2;
+                                for (int i = 2; i < 10; i++) {
+                                        try {
+                                                double value = derivative.value(i);
+                                                if (value > 0) {
+                                                        var = i - 1;
+                                                        break;
+                                                }
+                                                System.out.println(value);
+                                        } catch (FunctionEvaluationException ex) {
+                                                Logger.getLogger(StartSimulationTask.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                }
+                                int index = rand.nextInt(ranges.size() - 1);
+                                Range range = ranges.get(index);
+                                System.out.println("The choosen value is " + var);
+                                this.startCicle(range, var);
+                        } catch (OptimizationException ex) {
+                                Logger.getLogger(StartSimulationTask.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                }
         }
 }
