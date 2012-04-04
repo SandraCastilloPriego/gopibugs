@@ -39,18 +39,21 @@ public class StartSimulationParameters extends SimpleParameterSet {
                 "Introduce the number of copies of variables", new Integer(3));
         public static final Parameter bugLife = new SimpleParameter(
                 ParameterType.INTEGER, "Life of the Bugs",
-                "Minimum number of cicles that a bug can live", new Integer(300));       
+                "Minimum number of cicles that a bug can live", new Integer(300));
         public static final Parameter classifier = new SimpleParameter(
                 ParameterType.STRING, "Classifier",
                 "Select the classifier", null, classifiersEnum.values());
         public static final Parameter stoppingCriteria = new SimpleParameter(
                 ParameterType.INTEGER, "Stopping criteria (%)",
                 "% of variables in living in the world", new Integer(30));
+        public static final Parameter repProbability = new SimpleParameter(
+                ParameterType.DOUBLE, "Reproduction probability",
+                "Probability of reproduction when 2 bugs are compatible", new Double(0.5));
         public static final Parameter numberOfVariables = new SimpleParameter(
                 ParameterType.INTEGER, "Number of variables",
                 "Maximum number of Variables. Set \"-1\" if the selection has to be done automatically", new Integer(-1));
 
         public StartSimulationParameters() {
-                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, classifier, stoppingCriteria, numberOfVariables});
+                super(new Parameter[]{iterations, worldSize, bugLimit, numberOfBugs, bugLife, classifier, stoppingCriteria, repProbability, numberOfVariables});
         }
 }

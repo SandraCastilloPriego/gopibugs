@@ -55,7 +55,7 @@ public class World {
 
         public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
                 int numberOfBugsCopies, int bugLife, JTextArea text,
-                int bugsLimitNumber, int maxVariables, classifiersEnum classifier) {
+                int bugsLimitNumber, int maxVariables, classifiersEnum classifier, double repProbability) {
                 this.training = training;
                 this.validation = validation;
                 this.cellsPerSide = cellsPerSide;
@@ -78,7 +78,7 @@ public class World {
                         for (int i = 0; i < cellsPerSide; i++) {
                                 cells[i] = new Cell[cellsPerSide];
                                 for (int j = 0; j < cells[i].length; j++) {
-                                        cells[i][j] = new Cell(bugLife, maxVariables);
+                                        cells[i][j] = new Cell(bugLife, maxVariables, repProbability);
                                         this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
                                 }
                         }
@@ -119,6 +119,7 @@ public class World {
                         int X = this.rand.nextInt(this.cellsPerSide - 1);
                         int Y = this.rand.nextInt(this.cellsPerSide - 1);
                         Bug bug = new Bug(X, Y, cells[X][Y], row, training, bugLife, maxVariables, classifier);
+                        bug.eval();
                         cells[X][Y].addBug(bug);
                         this.population.add(bug);
                         isInside = false;
@@ -293,50 +294,7 @@ public class World {
                 return points;
         }
 
-        /*public int getFinalVariable() {
-        try {
-        int numOfVars = 0;
-        for (int i = 0; i < 20; i++) {
-        Bug bug = this.population.get(i);
-        numOfVars += bug.getRows().size();
-        if (i > 0) {
-        numOfVars /= 2;
-        }
-        }
-
-        PolynomialFunction fitted = fitter.fit();
-        for (int i = 3; i < numOfVars + 5; i++) {
-        double value = fitted.derivative().value(i);
-        System.out.println(i + " - " + value);
-        if (value > 0) {
-        numOfVars = i - 1;
-        break;
-        }
-        }
-
-        System.out.println("Number max:" + numOfVars);
-        return numOfVars;
-        } catch (FunctionEvaluationException ex) {
-        return -1;
-
-        } catch (OptimizationException ex) {
-        return -1;
-        }
-        }*
-
-        public int addVariable() {
-
-        numOfVars++;
-
-        return numOfVars;
-
-
-        }
-
-        public PolynomialFitter getfitter() {
-        return this.fitter;
-        }
-         */
+       
         public void restart(Range newRange) {
                 for (Cell[] cellArray : cells) {
                         for (Cell cell : cellArray) {
@@ -344,6 +302,6 @@ public class World {
                         }
                 }
 
-
+                this.addMoreBugs();
         }
 }

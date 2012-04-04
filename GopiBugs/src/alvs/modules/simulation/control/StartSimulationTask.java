@@ -75,6 +75,7 @@ public class StartSimulationTask {
         private List<Result> results;
         private boolean showResults, showCanvas;
         private int userDefinedMaxNVariables;
+        private double repProbability;
         PolynomialFitter fitter;
         int[] counter;
 
@@ -93,6 +94,7 @@ public class StartSimulationTask {
                 this.iterations = (Integer) parameters.getParameterValue(StartSimulationParameters.iterations);
                 this.maxBugs = (Integer) parameters.getParameterValue(StartSimulationParameters.bugLimit);
                 this.stoppingCriteria = (Integer) parameters.getParameterValue(StartSimulationParameters.stoppingCriteria);
+                this.repProbability = (Double) parameters.getParameterValue(StartSimulationParameters.repProbability);
                 this.classifier = (classifiersEnum) parameters.getParameterValue(StartSimulationParameters.classifier);
                 this.userDefinedMaxNVariables = (Integer) parameters.getParameterValue(StartSimulationParameters.numberOfVariables);
 
@@ -184,7 +186,7 @@ public class StartSimulationTask {
 
                 this.showCanvas = (Boolean) configuration.getParameterValue(ConfigurationParameters.showCanvas);
                 this.showResults = (Boolean) configuration.getParameterValue(ConfigurationParameters.showResults);
-                World world = new World(training, validation, this.worldSize, range, this.numberOfBugsCopies, this.bugLife, textArea, this.maxBugs, maxVariables, this.classifier);
+                World world = new World(training, validation, this.worldSize, range, this.numberOfBugsCopies, this.bugLife, textArea, this.maxBugs, maxVariables, this.classifier, this.repProbability);
                 canvas = new CanvasWorld(world);
                 canvasPanel.removeAll();
                 canvasPanel.add(canvas);
@@ -231,7 +233,7 @@ public class StartSimulationTask {
                 @Override
                 public void run() {
                         double result = Double.MAX_VALUE;
-                        while (result > stoppingCriteria || stopCounting < 25000) {
+                        while (result > stoppingCriteria) {
                                 for (int i = 0; i < iterations; i++) {
                                         if (showCanvas) {
                                                 // Paints the graphics
@@ -260,7 +262,7 @@ public class StartSimulationTask {
 
 
                                 // Checking the stopping criteria
-                                if (result <= stoppingCriteria || stopCounting > 25000) {
+                                if (result <= stoppingCriteria) {
                                         printResult(world.getBugs(), range);
                                 } else {
                                         world.restart(range);
@@ -282,8 +284,8 @@ public class StartSimulationTask {
                         }
                 };
 
-                for (Bug bug : bugs) {
-                        if (bug.getAge() > ((this.bugLife / 3) * 2)) {
+                for (Bug bug : bugs) {                       
+                        if (bug.getFMeasure() > 0.6) {
                                 Result result = new Result();
                                 result.Classifier = bug.getClassifierType().name();
                                 List<Integer> ids = new ArrayList<Integer>();
@@ -361,17 +363,17 @@ public class StartSimulationTask {
                                 world.restart(range);
                                 counter[nVar]++;
                         }
-                        checkSimIsOver();
+                        CheckErrorCurve();
                 }
         }
 
         private void startCicleVariableNumberSelection(Range range, int numberOfVariables) {
-                World iworld = new World(training, validation, this.worldSize, range, this.numberOfBugsCopies, this.bugLife, null, this.maxBugs, numberOfVariables, this.classifier);
+                World iworld = new World(training, validation, this.worldSize, range, this.numberOfBugsCopies, this.bugLife, null, this.maxBugs, numberOfVariables, this.classifier, this.repProbability);
                 sinkThreadVariableNumberSelection thread = new sinkThreadVariableNumberSelection(numberOfVariables, iworld);
                 thread.start();
         }
 
-        public void checkSimIsOver() {
+        public void CheckErrorCurve() {
                 boolean allOver = true;
 
                 for (int i = 2; i < 10; i++) {

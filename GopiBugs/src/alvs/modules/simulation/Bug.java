@@ -71,9 +71,7 @@ public class Bug {
         private BugDataset dataset;
         private Classifier classifier;
         private classifiersEnum classifierType;
-        private double wellClassified, total;
-        private double sensitivity = 0;
-        private double specificity = 0;
+        private double total;
         double spec = 0, sen = 0, totalspec = 0, totalsen = 0;
         private Random rand;
         private int MAXNUMBERGENES;
@@ -82,6 +80,7 @@ public class Bug {
         Range range;
         int[] clusters;
         Instances training, test;
+        double fValue = 0;
 
         public Bug(int x, int y, Cell cell, PeakListRow row, BugDataset dataset, int bugLife, int maxVariable, classifiersEnum classifier) {
                 rand = new Random();
@@ -107,6 +106,16 @@ public class Bug {
                 clusters = new int[rowList.size()];
                 for (int i = 0; i < rowList.size(); i++) {
                         clusters[i] = rowList.get(i).getCluster();
+                }
+        }
+
+        public void eval() {
+                try {
+                        eval = new Evaluation(training);
+                        eval.crossValidateModel(this.classifier, training, 10, rand);
+                        this.fValue = eval.fMeasure(1);
+                } catch (Exception ex) {
+                        this.life = 0;
                 }
         }
 
@@ -141,6 +150,7 @@ public class Bug {
                         this.classifierType = father.getClassifierType();
                 }
                 this.classify(cell.getRange());
+
                 this.life = bugLife;
 
                 clusters = new int[rowList.size()];
@@ -194,31 +204,8 @@ public class Bug {
                 return this.classifierType;
         }
 
-        public double getTotal() {
-                return this.wellClassified / this.total;
-        }
-
-        public double getSensitivity() {
-                if ((Double.isNaN(this.sensitivity))) {
-                        return 0.0;
-                }
-                return this.sensitivity;
-        }
-
-        public double getSpecificity() {
-                if ((Double.isNaN(this.specificity))) {
-                        return 0.0;
-                }
-                return this.specificity;
-        }
-
         public double getFMeasure() {
-                double value = (2 * this.sensitivity * this.specificity) / (this.sensitivity + this.specificity);
-                if (Double.isNaN(value)) {
-                        return 0.0;
-                } else {
-                        return value;
-                }
+                return fValue;
         }
 
         public List<PeakListRow> getRows() {
@@ -255,7 +242,7 @@ public class Bug {
         }
 
         boolean isDead() {
-                life -= 1;
+                life--;
                 if (this.rowList.isEmpty()) {
                         life = 0;
                 }
@@ -281,30 +268,13 @@ public class Bug {
 
         public void eat() {
 
-                total++;
-
-                if (cell.type.equals("1")) {
-                        this.totalspec++;
-                } else {
-                        this.totalsen++;
-                }
-
                 if (isClassified()) {
-                        wellClassified++;
-
                         this.life += 0.5;
-                        if (cell.type.equals("1")) {
-                                this.spec++;
-                        } else {
-                                this.sen++;
-                        }
 
                 } else {
                         this.life -= 0.5;
                 }
-
-                this.sensitivity = this.sen / this.totalsen;
-                this.specificity = this.spec / this.totalspec;
+                this.total++;
         }
 
         public void increaseEnergy() {
@@ -321,17 +291,15 @@ public class Bug {
 
         public boolean isClassified() {
                 try {
-                        int index = rand.nextInt(test.numInstances());
-                        int pred = (int) classifier.classifyInstance(test.instance(index));
-                        int value = (int) test.instance(index).classValue();
-                        value++;
-                        if (Integer.valueOf(test.instance(index).classAttribute().value(pred)) == value) {
+                        eval.evaluateModel(classifier, test);
+                        double f = eval.fMeasure(1);
+                        if (f > 0.7) {
                                 return true;
                         } else {
                                 return false;
                         }
+
                 } catch (Exception ex) {
-                       // ex.printStackTrace();
                         return false;
                 }
         }
@@ -462,9 +430,9 @@ public class Bug {
         public double getTestError() {
                 try {
                         Evaluation evalC = new Evaluation(training);
-                       evalC.crossValidateModel(classifier, training, 10, new Random(1));
+                        evalC.crossValidateModel(classifier, training, 10, new Random(1));
                         // evalC.evaluateModel(classifier, test);
-                        double CVError = 1 - evalC.fMeasure(0);
+                        double CVError = 1 - evalC.fMeasure(1);
                         return CVError;
                 } catch (Exception ex) {
                         ex.printStackTrace();
@@ -474,5 +442,21 @@ public class Bug {
 
         void setNewRange(Range newRange) {
                 this.range = newRange;
+        }
+
+        public boolean isSameBug(Bug bug) {
+                if (bug.getRows().size() != this.rowList.size()) {
+                        return false;
+                }
+                for (PeakListRow val : bug.getRows()) {
+                        if (!this.rowList.contains(val)) {
+                                return false;
+                        }
+                }
+                if (bug.getClassifierType().equals(this.classifierType)) {
+                        return true;
+                } else {
+                        return false;
+                }
         }
 }

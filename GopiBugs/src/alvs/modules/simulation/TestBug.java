@@ -20,6 +20,7 @@ package alvs.modules.simulation;
 import alvs.data.BugDataset;
 import alvs.data.PeakListRow;
 import java.util.List;
+import java.util.Random;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.ComplementNaiveBayes;
@@ -94,63 +95,26 @@ public class TestBug {
                         double[] values = new double[6];
                         if (validation != null) {
                                 Instances validationData = this.getDataset(this.validation);
-                                for (int i = 0; i < this.validation.getNumberCols(); i++) {
-                                        try {
-                                                double pred = classifier.classifyInstance(validationData.instance(i));
-                                                if (validationData.instance(i).toString(validationData.classIndex()).equals("1")) {
-                                                        this.totalspec++;
-                                                        if (validationData.classAttribute().value((int) pred).equals("1")) {
-                                                                this.spec++;
-                                                        }
-                                                } else {
-                                                        this.totalsen++;
-                                                        if (validationData.classAttribute().value((int) pred).equals("2")) {
-                                                                this.sen++;
-                                                        }
-                                                }
-                                        } catch (Exception eeee) {
-                                        }
-                                }
-                                values[3] = spec / totalspec;
-                                values[4] = sen / totalsen;
-
-
-                                /*  Evaluation eval = new Evaluation(validationData);
+                                Evaluation eval = new Evaluation(validationData);
                                 eval.crossValidateModel(classifier, validationData, 10, new Random(1));
-                                values[5] = eval.weightedAreaUnderROC();*/
-                                values[5] = 0;
+                                values[3] = eval.precision(1);
+                                values[4] = eval.recall(1);
+
+                                values[5] = eval.weightedAreaUnderROC();
                         }
                         spec = 0;
                         sen = 0;
                         totalspec = 0;
                         totalsen = 0;
-
-                        for (int i = 0; i < this.training.getNumberCols(); i++) {
-                                try {
-                                        double pred = classifier.classifyInstance(data.instance(i));
-
-                                        if (data.instance(i).toString(data.classIndex()).equals("1")) {
-                                                this.totalspec++;
-                                                if (data.classAttribute().value((int) pred).equals("1")) {
-                                                        this.spec++;
-                                                }
-                                        } else {
-                                                this.totalsen++;
-                                                if (data.classAttribute().value((int) pred).equals("2")) {
-                                                        this.sen++;
-                                                }
-                                        }
-                                } catch (Exception eeee) {
-                                }
-                        }
-
+                       
                         values[0] = spec / totalspec;
                         values[1] = sen / totalsen;
 
-                        /*  eval = new Evaluation(data);
+                        Evaluation eval = new Evaluation(data);
                         eval.crossValidateModel(classifier, data, 10, new Random(1));
-                        values[2] = eval.weightedAreaUnderROC();*/
-                        values[2] = 0;
+                        values[0] = eval.precision(1);
+                        values[1] = eval.recall(1);
+                        values[2] = eval.weightedAreaUnderROC();
                         return values;
 
                 } catch (Exception ex) {

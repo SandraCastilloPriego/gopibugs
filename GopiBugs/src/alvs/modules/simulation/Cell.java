@@ -33,13 +33,15 @@ public class Cell {
         String sampleName;
         List<Bug> bugsInside;
         int bugLife, maxVariable;
+        double repProbability;
         Random rand;
         Range range;
 
-        public Cell(int bugLife, int maxVariable) {
+        public Cell(int bugLife, int maxVariable, double repProbability) {
                 this.rand = new Random();
                 this.maxVariable = maxVariable;
                 this.bugLife = bugLife;
+                this.repProbability = repProbability;
 
         }
 
@@ -91,18 +93,18 @@ public class Cell {
                                 Collections.sort(bugsInside, c);
                                 Bug mother = bugsInside.get(0);
                                 for (Bug father : this.bugsInside) {
-                                        if (mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
+                                      //  if (mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
                                                 if (isKilling(mother.getFMeasure() - father.getFMeasure()) && father.getRows().size() > 1) {
-                                                        father.kill();
+                                                       father.kill();
                                                         // mother.increaseEnergy();
                                                 } else if (isKilling(father.getFMeasure() - mother.getFMeasure()) && mother.getRows().size() > 1) {
                                                         mother.kill();
                                                         //  father.increaseEnergy();
-                                                } else if (mother != father && mother.isClassified() && father.isClassified()) {
-                                                        // mother.addLife();
+                                                } else if (!mother.isSameBug(father) && isKilling(this.repProbability)/* && mother.isClassified() && father.isClassified()*/) {
+                                                        // mother.addLife();                                                        
                                                         childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
                                                 }
-                                        }
+                                     //   }
                                 }
                         }
                         return childs;
@@ -116,18 +118,19 @@ public class Cell {
                         return false;
                 }
                 double value = Math.random();
-                if (value < difference - 0.1) {
+                if (value <= difference-0.1) {
                         return true;
                 } else {
                         return false;
                 }
         }
 
-        void setRange(Range newRange) {
+        void setRange(Range newRange){
                 this.range = newRange;
                 for(Bug bug : this.bugsInside){
                         bug.setNewRange(newRange);
                         bug.classify(newRange);
+                        bug.eval();
                 }
         }
 }
