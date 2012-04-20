@@ -93,18 +93,18 @@ public class Cell {
                                 Collections.sort(bugsInside, c);
                                 Bug mother = bugsInside.get(0);
                                 for (Bug father : this.bugsInside) {
-                                      //  if (mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
-                                                if (isKilling(mother.getFMeasure() - father.getFMeasure()) && father.getRows().size() > 1) {
-                                                       father.kill();
-                                                        // mother.increaseEnergy();
-                                                } else if (isKilling(father.getFMeasure() - mother.getFMeasure()) && mother.getRows().size() > 1) {
-                                                        mother.kill();
-                                                        //  father.increaseEnergy();
-                                                } else if (!mother.isSameBug(father) && isKilling(this.repProbability)/* && mother.isClassified() && father.isClassified()*/) {
-                                                        // mother.addLife();                                                        
-                                                        childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
-                                                }
-                                     //   }
+                                        //  if (mother.getAge() > (this.bugLife / 3) && father.getAge() > (this.bugLife / 3)) {
+                                        if (isKilling(mother.getFMeasure() - father.getFMeasure()) && father.getAge() > father.getLife() / 2 && father.getRows().size() > 1) {
+                                                father.kill();
+                                                // mother.increaseEnergy();
+                                        } else if (isKilling(father.getFMeasure() - mother.getFMeasure()) && father.getAge() > father.getLife() / 2 && mother.getRows().size() > 1) {
+                                                mother.kill();
+                                                //  father.increaseEnergy();
+                                        } else if (!mother.isSameBug(father) && isKilling(this.repProbability)/* && mother.isClassified() && father.isClassified()*/) {
+                                                // mother.addLife();
+                                                childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
+                                        }
+                                        //   }
                                 }
                         }
                         return childs;
@@ -118,16 +118,16 @@ public class Cell {
                         return false;
                 }
                 double value = Math.random();
-                if (value <= difference-0.1) {
+                if (value <= difference - 0.1) {
                         return true;
                 } else {
                         return false;
                 }
         }
 
-        void setRange(Range newRange){
+        void setRange(Range newRange) {
                 this.range = newRange;
-                for(Bug bug : this.bugsInside){
+                for (Bug bug : this.bugsInside) {
                         bug.setNewRange(newRange);
                         bug.classify(newRange);
                         bug.eval();
