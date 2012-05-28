@@ -19,12 +19,7 @@ package alvs.modules.simulation;
 import alvs.data.BugDataset;
 import alvs.data.PeakListRow;
 import alvs.util.Range;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 import javax.swing.JTextArea;
 
 /**
@@ -74,26 +69,31 @@ public class World {
 
 
                 if (training != null) {
-                        cells = new Cell[cellsPerSide][cellsPerSide];
-                        for (int i = 0; i < cellsPerSide; i++) {
-                                cells[i] = new Cell[cellsPerSide];
-                                for (int j = 0; j < cells[i].length; j++) {
-                                        cells[i][j] = new Cell(bugLife, maxVariables, repProbability);
-                                        this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
+                        try {
+                                cells = new Cell[cellsPerSide][cellsPerSide];
+                                for (int i = 0; i < cellsPerSide; i++) {
+                                        cells[i] = new Cell[cellsPerSide];
+                                        for (int j = 0; j < cells[i].length; j++) {
+                                                cells[i][j] = new Cell(bugLife, maxVariables, repProbability);
+                                                this.setSamplesInCell(training.getAllColumnNames(), cells[i][j], range);
+                                        }
                                 }
-                        }
 
 
-                        for (int i = 0; i < numberOfBugsCopies; i++) {
-                                for (PeakListRow row : training.getRows()) {
-                                        this.addBug(row);
+                                for (int i = 0; i < numberOfBugsCopies; i++) {
+                                        for (PeakListRow row : training.getRows()) {
+                                                this.addBug(row);
+                                        }
                                 }
+                        } catch (Exception e) {
+                                System.out.println("variable X has been reporting memory problems");
+                                this.population = new ArrayList<Bug>();
                         }
 
                 }
                 for (PeakListRow row : training.getRows()) {
                         this.addBug(row);
-                }              
+                }
         }
 
         private void setSamplesInCell(Vector<String> samplesNames, Cell cell, Range range) {
@@ -274,7 +274,7 @@ public class World {
                         this.population.remove(bug);
                 }
         }
-      
+
         public List<Result> getResult() {
                 return this.results;
         }
@@ -294,11 +294,10 @@ public class World {
                 return points;
         }
 
-       
         public void restart(Range newRange) {
                 for (Cell[] cellArray : cells) {
                         for (Cell cell : cellArray) {
-                              cell.setRange(newRange);
+                                cell.setRange(newRange);
                         }
                 }
 

@@ -27,37 +27,19 @@ import java.util.ArrayList;
 import java.util.List;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.classifiers.bayes.ComplementNaiveBayes;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.bayes.NaiveBayesMultinomial;
-import weka.classifiers.bayes.NaiveBayesMultinomialUpdateable;
-import weka.classifiers.bayes.NaiveBayesUpdateable;
+import weka.classifiers.bayes.*;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.SimpleLogistic;
 import weka.classifiers.lazy.IB1;
 import weka.classifiers.lazy.KStar;
-import weka.classifiers.meta.AdaBoostM1;
-import weka.classifiers.meta.Bagging;
-import weka.classifiers.meta.LogitBoost;
-import weka.classifiers.meta.MultiScheme;
-import weka.classifiers.meta.RandomCommittee;
-import weka.classifiers.meta.RandomSubSpace;
-import weka.classifiers.meta.Stacking;
+import weka.classifiers.meta.*;
 import weka.classifiers.rules.OneR;
 import weka.classifiers.rules.PART;
 import weka.classifiers.rules.ZeroR;
-import weka.classifiers.trees.J48;
-import weka.classifiers.trees.LMT;
-import weka.classifiers.trees.REPTree;
-import weka.classifiers.trees.RandomForest;
-import weka.classifiers.trees.RandomTree;
+import weka.classifiers.trees.*;
 import weka.classifiers.trees.lmt.LogisticBase;
+import weka.core.*;
 
 /**
  *
@@ -143,7 +125,7 @@ public class TestTask implements Task {
         public void printPrediction() {
                 try {
                         validationData = this.getDataset(validation);
-                        Evaluation eval = new Evaluation(validationData);
+                        Evaluation eval = new Evaluation(validationData);                        
                         eval.evaluateModel(classifier, validationData);
                         for (int i = 0; i < validationData.numInstances(); i++) {
                                 System.out.println(validationData.instance(i).classValue() + " - " + eval.evaluateModelOnce(classifier, validationData.instance(i)));
