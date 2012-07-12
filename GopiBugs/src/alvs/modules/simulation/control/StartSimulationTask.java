@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2010 VTT Biotechnology
+ * Copyright 2010 - 2012 VTT Biotechnology
  * This file is part of ALVS.
  *
  * ALVS is free software; you can redistribute it and/or modify it under the
@@ -285,7 +285,7 @@ public class StartSimulationTask {
                 };
 
                 for (Bug bug : bugs) {                       
-                        if (bug.getFMeasure() > 0.6) {
+                        if (bug.getFMeasure() > 0.4) {
                                 Result result = new Result();
                                 result.Classifier = bug.getClassifierType().name();
                                 List<Integer> ids = new ArrayList<Integer>();

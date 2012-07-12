@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2010 VTT Biotechnology
+ * Copyright 2010 - 2012 VTT Biotechnology
  * This file is part of ALVS.
  *
  * ALVS is free software; you can redistribute it and/or modify it under the

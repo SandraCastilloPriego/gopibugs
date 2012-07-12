@@ -1,17 +1,17 @@
 /*
- * Copyright 2010
- * This file is part of XXXXXX.
- * XXXXXX is free software; you can redistribute it and/or modify it under the
+ * Copyright 2010 - 2012
+ * This file is part of ALVS.
+ * ALVS is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  * 
- * XXXXXX is distributed in the hope that it will be useful, but WITHOUT ANY
+ * ALVS is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License along with
- * XXXXXX; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
+ * ALVS; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
  * Fifth Floor, Boston, MA 02110-1301 USA
  */
 package alvs.modules.simulation;
@@ -50,7 +50,6 @@ public class Bug {
         private int x, y;
         private List<PeakListRow> rowList;
         private int life = 300;
-        private BugDataset dataset;
         private Classifier classifier;
         private classifiersEnum classifierType;
         private double total;
@@ -68,7 +67,6 @@ public class Bug {
                 rand = new Random();
                 this.cell = cell;
                 this.range = cell.getRange();
-                this.dataset = dataset;
                 this.x = x;
                 this.y = y;
                 this.rowList = new ArrayList<PeakListRow>();
@@ -82,7 +80,7 @@ public class Bug {
                 } else {
                         this.classifierType = classifier;
                 }
-                this.classify(cell.getRange());
+                this.classify(cell.getRange(), dataset);
                 this.life = bugLife;
 
                 clusters = new int[rowList.size()];
@@ -97,13 +95,15 @@ public class Bug {
                         eval.crossValidateModel(this.classifier, training, 10, rand);
                         this.fValue = eval.fMeasure(1);
                 } catch (Exception ex) {
-                       // this.life = 0;
+                        // this.life = 0;
                 }
         }
 
         @Override
         public Bug clone() {
-                Bug newBug = new Bug(this.x, this.y, this.cell, null, this.dataset, this.life, this.MAXNUMBERGENES, this.classifierType);
+                Bug newBug = new Bug(this.x, this.y, this.cell, null, null, this.life, this.MAXNUMBERGENES, this.classifierType);
+                newBug.training = this.training;
+                newBug.test = this.test;
                 newBug.rowList = this.getRows();
                 return newBug;
         }
@@ -114,7 +114,6 @@ public class Bug {
 
         public Bug(Bug father, Bug mother, BugDataset dataset, int bugLife, int maxVariable) {
                 rand = new Random();
-                this.dataset = dataset;
                 this.cell = father.getCell();
                 this.range = cell.getRange();
                 this.x = father.getx();
@@ -131,7 +130,7 @@ public class Bug {
                 } else {
                         this.classifierType = father.getClassifierType();
                 }
-                this.classify(cell.getRange());
+                this.classify(cell.getRange(), dataset);
 
                 this.life = bugLife;
 
@@ -157,7 +156,7 @@ public class Bug {
                 }
         }
 
-        public void orderPurgeGenes() {
+        private void orderPurgeGenes() {
                 int removeGenes = this.rowList.size() - this.MAXNUMBERGENES;
                 if (removeGenes > 0) {
                         for (int i = 0; i < removeGenes; i++) {
@@ -219,10 +218,6 @@ public class Bug {
                 return life;
         }
 
-        public BugDataset getDataset() {
-                return this.dataset;
-        }
-
         boolean isDead() {
                 life--;
                 if (this.rowList.isEmpty()) {
@@ -235,9 +230,9 @@ public class Bug {
                 }
         }
 
-        public void classify(Range range) {
+        public void classify(Range range, BugDataset dataset) {
                 try {
-                        getWekaDataset(range);
+                        getWekaDataset(range, dataset);
                         classifier = setClassifier();
                         if (classifier != null) {
                                 classifier.buildClassifier(training);
@@ -347,7 +342,7 @@ public class Bug {
 
         }
 
-        private void getWekaDataset(Range range) {
+        private void getWekaDataset(Range range, BugDataset dataset) {
                 try {
 
                         FastVector attributes = new FastVector();
@@ -369,7 +364,7 @@ public class Bug {
                         this.training = new Instances("Dataset", attributes, 0);
                         this.test = new Instances("test Dataset", attributes, 0);
 
-                        for (int i = 0; i < this.dataset.getNumberCols(); i++) {
+                        for (int i = 0; i < dataset.getNumberCols(); i++) {
                                 if (!range.contains(i)) {
                                         String sampleName = dataset.getAllColumnNames().elementAt(i);
 
@@ -378,7 +373,7 @@ public class Bug {
                                         for (PeakListRow row : rowList) {
                                                 values[cont++] = (Double) row.getPeak(sampleName);
                                         }
-                                        values[cont] = training.attribute(training.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
+                                        values[cont] = training.attribute(training.numAttributes() - 1).indexOfValue(dataset.getSampleType(sampleName));
 
                                         Instance inst = new SparseInstance(1.0, values);
                                         training.add(inst);
@@ -390,7 +385,7 @@ public class Bug {
                                         for (PeakListRow row : rowList) {
                                                 values[cont++] = (Double) row.getPeak(sampleName);
                                         }
-                                        values[cont] = test.attribute(test.numAttributes() - 1).indexOfValue(this.dataset.getSampleType(sampleName));
+                                        values[cont] = test.attribute(test.numAttributes() - 1).indexOfValue(dataset.getSampleType(sampleName));
 
                                         Instance inst = new SparseInstance(1.0, values);
                                         test.add(inst);
@@ -400,7 +395,6 @@ public class Bug {
 
                         training.setClass(type);
                         test.setClass(type);
-
 
                 } catch (Exception ex) {
                         Logger.getLogger(Bug.class.getName()).log(Level.SEVERE, null, ex);

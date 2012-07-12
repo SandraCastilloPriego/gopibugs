@@ -1,27 +1,24 @@
 /*
- * Copyright 2010
- * This file is part of XXXXXX.
- * XXXXXX is free software; you can redistribute it and/or modify it under the
+ * Copyright 2010 - 2012
+ * This file is part of ALVS.
+ * ALVS is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  * 
- * XXXXXX is distributed in the hope that it will be useful, but WITHOUT ANY
+ * ALVS is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License along with
- * XXXXXX; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
+ * ALVS; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
  * Fifth Floor, Boston, MA 02110-1301 USA
  */
 package alvs.modules.simulation;
 
+import alvs.data.BugDataset;
 import alvs.util.Range;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  *
@@ -76,7 +73,7 @@ public class Cell {
                 return this.type;
         }
 
-        public synchronized List<Bug> reproduction() {
+        public synchronized List<Bug[]> reproduction() {
                 try {
                         Comparator<Bug> c = new Comparator<Bug>() {
 
@@ -88,7 +85,7 @@ public class Cell {
                                         }
                                 }
                         };
-                        List<Bug> childs = new ArrayList<Bug>();
+                        List<Bug[]> childs = new ArrayList<Bug[]>();
                         if (bugsInside.size() > 1) {
                                 Collections.sort(bugsInside, c);
                                 Bug mother = bugsInside.get(0);
@@ -102,7 +99,10 @@ public class Cell {
                                                 //  father.increaseEnergy();
                                         } else if (!mother.isSameBug(father) && isKilling(this.repProbability)/* && mother.isClassified() && father.isClassified()*/) {
                                                 // mother.addLife();
-                                                childs.add(new Bug(mother, father, mother.getDataset(), bugLife, maxVariable));
+                                                Bug[] b = new Bug[2];
+                                                b[0]= father;
+                                                b[1] = mother;
+                                                childs.add(b);
                                         }
                                         //   }
                                 }
@@ -125,11 +125,11 @@ public class Cell {
                 }
         }
 
-        void setRange(Range newRange) {
+        void setRange(Range newRange, BugDataset dataset) {
                 this.range = newRange;
                 for (Bug bug : this.bugsInside) {
                         bug.setNewRange(newRange);
-                        bug.classify(newRange);
+                        bug.classify(newRange, dataset);
                         bug.eval();
                 }
         }

@@ -1,17 +1,17 @@
 /*
- * Copyright 2010
- * This file is part of XXXXXX.
- * XXXXXX is free software; you can redistribute it and/or modify it under the
+ * Copyright 2010 - 2012
+ * This file is part of ALVS.
+ * ALVS is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  * 
- * XXXXXX is distributed in the hope that it will be useful, but WITHOUT ANY
+ * ALVS is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License along with
- * XXXXXX; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
+ * ALVS; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
  * Fifth Floor, Boston, MA 02110-1301 USA
  */
 package alvs.modules.simulation;
@@ -28,7 +28,7 @@ import javax.swing.JTextArea;
  */
 public class World {
 
-        BugDataset training, validation;
+        BugDataset trainingDataset, validationDataset;
         Cell[][] cells;
         List<Bug> population;
         Random rand;
@@ -51,8 +51,8 @@ public class World {
         public World(BugDataset training, BugDataset validation, int cellsPerSide, Range range,
                 int numberOfBugsCopies, int bugLife, JTextArea text,
                 int bugsLimitNumber, int maxVariables, classifiersEnum classifier, double repProbability) {
-                this.training = training;
-                this.validation = validation;
+                this.trainingDataset = training;
+                this.validationDataset = validation;
                 this.cellsPerSide = cellsPerSide;
                 this.numberOfCells = cellsPerSide * cellsPerSide;
                 this.population = new ArrayList<Bug>();
@@ -99,11 +99,11 @@ public class World {
         private void setSamplesInCell(Vector<String> samplesNames, Cell cell, Range range) {
                 int pos = range.getRandom();
                 String name = samplesNames.elementAt(pos);
-                cell.setParameters(name, range, training.getSampleType(name));
+                cell.setParameters(name, range, trainingDataset.getSampleType(name));
         }
 
         public synchronized void addMoreBugs() {
-                for (PeakListRow row : training.getRows()) {
+                for (PeakListRow row : trainingDataset.getRows()) {
                         this.addBug(row);
                 }
         }
@@ -118,7 +118,7 @@ public class World {
                 while (isInside) {
                         int X = this.rand.nextInt(this.cellsPerSide - 1);
                         int Y = this.rand.nextInt(this.cellsPerSide - 1);
-                        Bug bug = new Bug(X, Y, cells[X][Y], row, training, bugLife, maxVariables, classifier);
+                        Bug bug = new Bug(X, Y, cells[X][Y], row, trainingDataset, bugLife, maxVariables, classifier);
                         bug.eval();
                         cells[X][Y].addBug(bug);
                         this.population.add(bug);
@@ -143,9 +143,10 @@ public class World {
                                 if (this.changeNVariables) {
                                         cell.setMaxVariable(maxVariables);
                                 }
-                                List<Bug> childs = cell.reproduction();
+                                List<Bug[]> childs = cell.reproduction();
                                 if (childs != null) {
-                                        for (Bug child : childs) {
+                                        for (Bug[] parents : childs) {                                              
+                                                Bug child = new Bug(parents[0], parents[1], this.trainingDataset, this.bugLife, this.maxVariables);
                                                 cell.addBug(child);
                                                 this.population.add(child);
                                         }
@@ -297,10 +298,11 @@ public class World {
         public void restart(Range newRange) {
                 for (Cell[] cellArray : cells) {
                         for (Cell cell : cellArray) {
-                                cell.setRange(newRange);
+                                cell.setRange(newRange, this.trainingDataset);
                         }
                 }
 
                 this.addMoreBugs();
         }
+       
 }

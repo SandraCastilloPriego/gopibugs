@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2010
+ * Copyright 2010 - 2012
  * This file is part of ALVS.
  *
  * ALVS is free software; you can redistribute it and/or modify it under the
